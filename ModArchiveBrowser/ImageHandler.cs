@@ -14,60 +14,62 @@ namespace ModArchiveBrowser
 
     //because we are going to display image from urls in a draw loop
     //need to handle caching,no multiple requests on same ressources,avoid 429 errors
-    internal class ImageHandler : IDisposable
+    using System;
+    using System.Collections.Concurrent;
+    using System.IO;
+    using System.Net.Http;
+    using System.Threading.Tasks;
+    using System.Collections.Generic;
+
+    public class ImageHandler
     {
+        private readonly string _downloadDirectory;
         private readonly HttpClient _httpClient;
-        private readonly ConcurrentDictionary<string, Task<Bitmap>> _imageCache;
+        private readonly HashSet<string> _downloadedFilenames;
 
-        public ImageHandler()
+        public ImageHandler(string downloadDirectory)
         {
+            _downloadDirectory = downloadDirectory;
             _httpClient = new HttpClient();
-            _imageCache = new ConcurrentDictionary<string, Task<Bitmap>>();
-        }
+            _downloadedFilenames = new HashSet<string>();//maybe fill this with cache dir or load from config later
 
-        public Task<Bitmap> GetImageAsync(string url)
-        {
-            // Check if the image is already cached
-            if (_imageCache.TryGetValue(url, out var cachedImage))
+            // Check if it exist first
+            if (!Directory.Exists(_downloadDirectory))
             {
-                return cachedImage; // Return cached image Task
+                Directory.CreateDirectory(_downloadDirectory);
             }
-
-            // Download the image and cache it asynchronously
-            var downloadTask = DownloadImageAsync(url);
-            _imageCache.TryAdd(url, downloadTask); // Cache the download task
-
-            return downloadTask;
         }
 
-        private async Task<Bitmap> DownloadImageAsync(string url)
+        public string DownloadImage(string imageUrl)
         {
             try
             {
-                using var response = await _httpClient.GetAsync(url);
-                response.EnsureSuccessStatusCode();
+                // Extract the file name from the URL (e.g. a41de820-fb64-4eb7-9995-ad9953dbf5e8.jpg)
+                string fileName = Path.GetFileName(new Uri(imageUrl).AbsolutePath);
 
-                await using var responseStream = await response.Content.ReadAsStreamAsync();
-                var bitmap = new Bitmap(responseStream);
+                if (_downloadedFilenames.Contains(fileName))
+                {
+                    return Path.Combine(_downloadDirectory, fileName);
+                }
 
-                // You might want to resize or process the image here if necessary.
-                return bitmap;
+
+                byte[] imageBytes = _httpClient.GetByteArrayAsync(imageUrl).Result;
+
+
+                string filePath = Path.Combine(_downloadDirectory, fileName);
+                File.WriteAllBytes(filePath, imageBytes);
+
+               
+                _downloadedFilenames.Add(fileName);
+                return filePath; 
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error downloading image from {url}: {ex.Message}");
-                return null; // Handle failure gracefully (null bitmap)
+                Plugin.Logger.Error($"Failed to download image: {imageUrl}. Error: {ex.Message}");
+                return null;
             }
-        }
-
-        public void Dispose()
-        {
-            _httpClient.Dispose();
-            foreach (var kvp in _imageCache)
-            {
-                kvp.Value.Dispose(); // Dispose of cached bitmaps
-            }
-            _imageCache.Clear();
         }
     }
+
+
 }
