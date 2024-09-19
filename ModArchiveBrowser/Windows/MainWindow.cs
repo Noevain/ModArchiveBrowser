@@ -1,24 +1,27 @@
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using Dalamud.Interface.Internal;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
+using System.Net.Http;
 using ImGuiNET;
+using HtmlAgilityPack;
 
 namespace ModArchiveBrowser.Windows;
 
 public class MainWindow : Window, IDisposable
 {
-    private string GoatImagePath;
     private Plugin Plugin;
-
+    private List<ModThumb> modThumbs;
     // We give this window a hidden ID using ##
     // So that the user will see "My Amazing Window" as window title,
     // but for ImGui the ID is "My Amazing Window##With a hidden ID"
     public MainWindow(Plugin plugin)
-        : base("My Amazing Window##With a hidden ID", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
+        : base("My Amazing Window##With a hidden ID")
     {
+        modThumbs = WebClient.GetHomePageMods();
         SizeConstraints = new WindowSizeConstraints
         {
             MinimumSize = new Vector2(375, 330),
@@ -31,13 +34,12 @@ public class MainWindow : Window, IDisposable
 
     public override void Draw()
     {
-        ImGui.Text($"The random config bool is {Plugin.Configuration.SomePropertyToBeSavedAndWithADefault}");
-
-        if (ImGui.Button("Show Settings"))
+        foreach (ModThumb thumb in modThumbs)
         {
-            Plugin.ToggleConfigUI();
+            
+            ImGui.Text($"Mod title:{thumb.name}");
+            ImGui.Text($"Mod author:{thumb.author}");
+            ImGui.Separator();
         }
-
-        ImGui.Spacing();
     }
 }
