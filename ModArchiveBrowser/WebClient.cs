@@ -121,7 +121,7 @@ namespace ModArchiveBrowser
             string originalReleaseDate;
             HtmlNodeCollection authorProfilePictureNodes = page.DocumentNode.SelectNodes("//div[contains(@class, 'user-card')]//img[contains(@class, 'rounded-circle')]/@src");
             HtmlNodeCollection downloadModButtonNodes = page.DocumentNode.SelectNodes("//a[@id='mod-download-link']/@href");
-            HtmlNodeCollection affectsReplacesNodes = page.DocumentNode.SelectNodes("//div[contains(@class, 'mod-meta-block')]//code[contains(text(), '/')]");
+            HtmlNodeCollection affectsReplacesNodes = page.DocumentNode.SelectNodes("//div[contains(@class, 'mod-meta-block')][contains(text(),'Affects')]//code[contains(text(), '')]");
             HtmlNodeCollection racesNodes = page.DocumentNode.SelectNodes("//div[contains(@class, 'mod-meta-block')]//code[contains(@class, 'text-light')]//a[contains(@href, '/search?races=')]");
             HtmlNodeCollection tagsNodes = page.DocumentNode.SelectNodes("//div[contains(@class, 'mod-meta-block')]//code[contains(@class, 'text-light')]//a[contains(@href, '/search?tags=')]");
             HtmlNodeCollection viewsNodes = page.DocumentNode.SelectNodes("//span[contains(@class, 'emoji-block') and contains(@title, 'Views')]//span[contains(@class, 'count')]");
@@ -130,7 +130,14 @@ namespace ModArchiveBrowser
             HtmlNodeCollection lastVersionUpdateNodes = page.DocumentNode.SelectNodes("//div[contains(@class, 'mod-meta-block')]//code[contains(@class, 'server-date')][1]");
             profile_pic = authorProfilePictureNodes[0].GetAttributeValue("src", "none");
             download_url = downloadModButtonNodes[0].GetAttributeValue("href", "none");
-            affectReplace = affectsReplacesNodes[0].InnerText;
+            if (affectsReplacesNodes != null)
+            {
+                affectReplace = affectsReplacesNodes[0].InnerText;
+            }
+            else
+            {
+                affectReplace = "N/A";
+            }
             races = new string[racesNodes.Count];
             for (int i = 0; i < racesNodes.Count; i++)
             {
