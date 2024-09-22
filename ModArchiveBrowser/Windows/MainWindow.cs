@@ -24,12 +24,12 @@ public class MainWindow : Window, IDisposable
     // So that the user will see "My Amazing Window" as window title,
     // but for ImGui the ID is "My Amazing Window##With a hidden ID"
     public MainWindow(Plugin plugin)
-        : base("My Amazing Window##With a hidden ID")
+        : base("XIV Mod Archive Browser##modarchivebrowserhome")
     {
         modThumbs = WebClient.GetHomePageMods();
         SizeConstraints = new WindowSizeConstraints
         {
-            MinimumSize = new Vector2(375, 330),
+            MinimumSize = new Vector2(600, 500),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
         Plugin = plugin;
