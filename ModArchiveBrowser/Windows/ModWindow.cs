@@ -54,6 +54,12 @@ namespace ModArchiveBrowser.Windows
             }
             ImGui.Text(race_str);
             ImGui.Text(tag_str);
+
+            ImGui.Separator();
+            if (ImGui.Button("Install using Penumbra"))
+            {
+                
+            }
             
 
         }
