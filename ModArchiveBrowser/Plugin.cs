@@ -6,6 +6,7 @@ using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using ModArchiveBrowser.Windows;
 using HtmlAgilityPack;
+using ModArchiveBrowser.Interop.Penumbra;
 
 namespace ModArchiveBrowser;
 
@@ -21,6 +22,8 @@ public sealed class Plugin : IDalamudPlugin
     public Configuration Configuration { get; init; }
 
     public readonly WindowSystem WindowSystem = new("ModArchiveBrowser");
+
+    public readonly PenumbraService penumbra;
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
     public Plugin()
@@ -35,6 +38,8 @@ public sealed class Plugin : IDalamudPlugin
 
         WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
+
+        penumbra = new PenumbraService(PluginInterface);
 
         CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
         {

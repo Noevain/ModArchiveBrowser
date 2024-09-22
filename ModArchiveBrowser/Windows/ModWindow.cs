@@ -9,6 +9,8 @@ using Dalamud.Interface.Internal;
 using Dalamud.Interface.Utility;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
+using Penumbra.Api.IpcSubscribers;
+using Penumbra.Api.Enums;
 namespace ModArchiveBrowser.Windows
 {
     public class ModWindow : Window, IDisposable
@@ -16,10 +18,12 @@ namespace ModArchiveBrowser.Windows
         private Plugin Plugin;
         private readonly string modurl;
         private readonly Mod mod;
+        private ModHandler modHandler;
         public ModWindow(Plugin plugin,ModThumb modThumb): base($"Mod view window##{modThumb.name}")
         {
             Plugin = plugin;
             Plugin.Logger.Debug(modThumb.url);
+            this.modHandler = new ModHandler("./ModDownloads");
             SizeConstraints = new WindowSizeConstraints
             {
                 MinimumSize = new Vector2(375, 330),
@@ -58,6 +62,12 @@ namespace ModArchiveBrowser.Windows
             ImGui.Separator();
             if (ImGui.Button("Install using Penumbra"))
             {
+                string modpath = modHandler.DownloadMod(WebClient.xivmodarchiveRoot + mod.url_download_button);
+                PenumbraApiEc res = Plugin.penumbra.InstallMod(modpath);
+                    if(res != PenumbraApiEc.Success)
+                    {
+                        Plugin.Logger.Error($"Failed to install mod,code:{res.ToString()}");
+                    }
                 
             }
             
