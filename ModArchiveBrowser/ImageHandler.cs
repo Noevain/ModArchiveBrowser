@@ -8,6 +8,7 @@ using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Threading.Tasks;
+using System.Net;
 
 namespace ModArchiveBrowser
 {
@@ -66,7 +67,7 @@ namespace ModArchiveBrowser
             catch (Exception ex)
             {
                 Plugin.Logger.Error($"Failed to download image: {imageUrl}. Error: {ex.Message}");
-                return null;
+                return string.Empty;
             }
         }
     }
