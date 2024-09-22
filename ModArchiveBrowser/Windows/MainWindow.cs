@@ -9,6 +9,7 @@ using System.Net.Http;
 using ImGuiNET;
 using HtmlAgilityPack;
 using Dalamud.Interface.Textures;
+using System.Net.Http.Headers;
 
 namespace ModArchiveBrowser.Windows;
 
@@ -33,7 +34,9 @@ public class MainWindow : Window, IDisposable
         Plugin = plugin;
     }
 
-    public void Dispose() { }
+    public void Dispose() {
+
+    }
 
     public override void Draw()
     {
@@ -47,7 +50,12 @@ public class MainWindow : Window, IDisposable
             var modThumbnail = Plugin.TextureProvider.GetFromFile(imageHandler.DownloadImage(thumb.url_thumb)).GetWrapOrDefault();
             if (modThumbnail != null)
             {
-                ImGui.Image(modThumbnail.ImGuiHandle, new Vector2(modThumbnail.Width, modThumbnail.Height));
+                if(ImGui.ImageButton(modThumbnail.ImGuiHandle, new Vector2(modThumbnail.Width, modThumbnail.Height)))
+                {
+                    var modwin = new ModWindow(Plugin, thumb);
+                    Plugin.WindowSystem.AddWindow(modwin);
+                    modwin.Toggle();
+                }
             }
             ImGui.Separator();
         }
