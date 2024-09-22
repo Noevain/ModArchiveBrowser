@@ -18,7 +18,6 @@ public class MainWindow : Window, IDisposable
 {
     private Plugin Plugin;
     private List<ModThumb> modThumbs;
-
     private ImageHandler imageHandler = new ImageHandler("./DownloadCache");
     // We give this window a hidden ID using ##
     // So that the user will see "My Amazing Window" as window title,
@@ -50,9 +49,18 @@ public class MainWindow : Window, IDisposable
                 {
                     if (ImGui.ImageButton(modThumbnail.ImGuiHandle, new Vector2(modThumbnail.Width, modThumbnail.Height)))
                     {
-                        var modwin = new ModWindow(Plugin, thumb);
-                        Plugin.WindowSystem.AddWindow(modwin);
-                        modwin.Toggle();
+                    try
+                    {
+                        Plugin.modWindow.ChangeMod(thumb);
+                        if (!Plugin.modWindow.IsOpen)
+                        {
+                            Plugin.modWindow.Toggle();
+                        }
+                    }
+                    catch(Exception e)
+                    {
+                        Plugin.Logger.Error($"Caught ex,changing window:{e}");
+                    }
                     }
                 }
                 ImGui.TextWrapped(thumb.name);

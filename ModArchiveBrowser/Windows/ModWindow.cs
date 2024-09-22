@@ -16,29 +16,32 @@ namespace ModArchiveBrowser.Windows
     public class ModWindow : Window, IDisposable
     {
         private Plugin Plugin;
-        private readonly string modurl;
-        private readonly Mod mod;
+        private Mod? mod;
         private ModHandler modHandler = new ModHandler("./ModDownloads");
         private ImageHandler imageHandler = new ImageHandler("./DownloadCache");
-        public ModWindow(Plugin plugin,ModThumb modThumb): base($"Mod view window##{modThumb.name}")
+        public ModWindow(Plugin plugin): base("Mod view window##")
         {
             Plugin = plugin;
-            Plugin.Logger.Debug(modThumb.url);
 
             SizeConstraints = new WindowSizeConstraints
             {
                 MinimumSize = new Vector2(375, 330),
                 MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
             };
+        }
+
+        public void ChangeMod(ModThumb modThumb)
+        {
             this.mod = WebClient.GetModPage(modThumb);
         }
         public void Dispose()
         {
-            Plugin.WindowSystem.RemoveWindow(this);
+
         }
 
         private void DrawModPage()
         {
+
             // DT compatiblity
             ImGui.TextColored(new Vector4(0.0f, 1.0f, 0.0f, 1.0f), "DT Compatibility: ✅ This mod is compatible with Dawntrail.");
 
@@ -48,16 +51,16 @@ namespace ModArchiveBrowser.Windows
             {
                 // Mod Title
                 ImGui.BeginChild("LeftColumn", new Vector2(0, 0), true);
-                ImGui.Text(mod.modThumb.name);
+                ImGui.Text(mod.Value.modThumb.name);
 
                 ImGui.Separator();
 
                 // Author
-                ImGui.Text($"{mod.modThumb.type} by {mod.modThumb.author}");
+                ImGui.Text($"{mod.Value.modThumb.type} by {mod.Value.modThumb.author}");
 
                 // Image Carousel Placeholder
                 ImGui.Text("Mod Preview Image");
-                var modThumbnail = Plugin.TextureProvider.GetFromFile(imageHandler.DownloadImage(mod.modThumb.url_thumb)).GetWrapOrDefault();
+                var modThumbnail = Plugin.TextureProvider.GetFromFile(imageHandler.DownloadImage(mod.Value.modThumb.url_thumb)).GetWrapOrDefault();
                 if (modThumbnail != null)
                 {
                     ImGui.Image(modThumbnail.ImGuiHandle, new Vector2(300, 200)); // Placeholder for image carousel
@@ -68,7 +71,7 @@ namespace ModArchiveBrowser.Windows
                 }
 
                 // Tabs (Info, Files, History)
-                ImGui.TextWrapped(mod.modMeta.description);
+                ImGui.TextWrapped(mod.Value.modMeta.description);
 
                 ImGui.EndChild();
             }
@@ -80,8 +83,8 @@ namespace ModArchiveBrowser.Windows
                 ImGui.BeginChild("RightColumn", new Vector2(0, 0), true);
 
                 // Author Card
-                ImGui.Text(mod.modThumb.author);
-                var authorpicThumbnail = Plugin.TextureProvider.GetFromFile(imageHandler.DownloadImage(mod.url_author_profilepic)).GetWrapOrDefault();
+                ImGui.Text(mod.Value.modThumb.author);
+                var authorpicThumbnail = Plugin.TextureProvider.GetFromFile(imageHandler.DownloadImage(mod.Value.url_author_profilepic)).GetWrapOrDefault();
                 if (authorpicThumbnail != null)
                 {
                     ImGui.Image(authorpicThumbnail.ImGuiHandle, new Vector2(100, 100));
@@ -95,7 +98,7 @@ namespace ModArchiveBrowser.Windows
                 // Download button
                     if (ImGui.Button("Install using Penumbra"))
                     {
-                        string modpath = modHandler.DownloadMod(WebClient.xivmodarchiveRoot + mod.url_download_button);
+                        string modpath = modHandler.DownloadMod(WebClient.xivmodarchiveRoot + mod.Value.url_download_button);
                         PenumbraApiEc res = Plugin.penumbra.InstallMod(modpath);
                         if (res != PenumbraApiEc.Success)
                         {
@@ -112,27 +115,27 @@ namespace ModArchiveBrowser.Windows
                 ImGui.Separator();
 
                 // Stats
-                ImGui.Text($"Views: {mod.modMeta.views}");
-                ImGui.Text($"Downloads: {mod.modMeta.downloads}");
-                ImGui.Text($"Followers: {mod.modMeta.pins}");
+                ImGui.Text($"Views: {mod.Value.modMeta.views}");
+                ImGui.Text($"Downloads: {mod.Value.modMeta.downloads}");
+                ImGui.Text($"Followers: {mod.Value.modMeta.pins}");
 
                 ImGui.Separator();
 
                 // Metadata
                 var race_str = string.Empty;
-                for (int i = 0; i < mod.modMeta.races.Length; i++)
+                for (int i = 0; i < mod.Value.modMeta.races.Length; i++)
                 {
-                    race_str = race_str + mod.modMeta.races[i] + " ,";
+                    race_str = race_str + mod.Value.modMeta.races[i] + " ,";
                 }
                 var tag_str = string.Empty;
-                for (int i = 0; i < mod.modMeta.tags.Length; i++)
+                for (int i = 0; i < mod.Value.modMeta.tags.Length; i++)
                 {
-                    tag_str = tag_str + mod.modMeta.tags[i]+ " ,";
+                    tag_str = tag_str + mod.Value.modMeta.tags[i]+ " ,";
                 }
-                ImGui.Text($"Last Version Update: {mod.modMeta.last_update}");
-                ImGui.Text($"Affects / Replaces: {mod.modMeta.affectReplace}");
+                ImGui.Text($"Last Version Update: {mod.Value.modMeta.last_update}");
+                ImGui.Text($"Affects / Replaces: {mod.Value.modMeta.affectReplace}");
                 ImGui.Text($"Races: {race_str}");
-                ImGui.TextWrapped($"Genders: {mod.modThumb.genders}");
+                ImGui.TextWrapped($"Genders: {mod.Value.modThumb.genders}");
                 ImGui.TextWrapped($"Tags: {tag_str}");
 
                 ImGui.EndChild();
@@ -142,8 +145,15 @@ namespace ModArchiveBrowser.Windows
         }
         public override void Draw()
         {
-            
-           DrawModPage();
+           if(mod is not null)
+            {
+                DrawModPage();
+            }
+            else
+            {
+                ImGui.Text("No mod selected,use the main window to browse some mods");
+            }
+           
 
         }
     }

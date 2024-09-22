@@ -26,6 +26,8 @@ public sealed class Plugin : IDalamudPlugin
     public readonly PenumbraService penumbra;
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
+
+    public ModWindow modWindow { get; init; }
     public Plugin()
     {
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
@@ -34,10 +36,12 @@ public sealed class Plugin : IDalamudPlugin
         //var goatImagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");
 
         ConfigWindow = new ConfigWindow(this);
+        modWindow = new ModWindow(this);
         MainWindow = new MainWindow(this);
 
         WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
+        WindowSystem.AddWindow(modWindow);
 
         penumbra = new PenumbraService(PluginInterface);
 
@@ -62,7 +66,7 @@ public sealed class Plugin : IDalamudPlugin
 
         ConfigWindow.Dispose();
         MainWindow.Dispose();
-
+        modWindow.Dispose();
         CommandManager.RemoveHandler(CommandName);
     }
 
