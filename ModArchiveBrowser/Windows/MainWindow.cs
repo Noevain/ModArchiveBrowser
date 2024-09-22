@@ -10,6 +10,7 @@ using ImGuiNET;
 using HtmlAgilityPack;
 using Dalamud.Interface.Textures;
 using System.Net.Http.Headers;
+using ImGuizmoNET;
 
 namespace ModArchiveBrowser.Windows;
 
@@ -38,26 +39,51 @@ public class MainWindow : Window, IDisposable
 
     }
 
+    private void DrawHomePageTable()
+    {
+        int modCount = 0;
+        foreach (ModThumb thumb in modThumbs)
+            {
+                ImGui.BeginGroup();
+                var modThumbnail = Plugin.TextureProvider.GetFromFile(imageHandler.DownloadImage(thumb.url_thumb)).GetWrapOrDefault();
+                if (modThumbnail != null)
+                {
+                    if (ImGui.ImageButton(modThumbnail.ImGuiHandle, new Vector2(modThumbnail.Width, modThumbnail.Height)))
+                    {
+                        var modwin = new ModWindow(Plugin, thumb);
+                        Plugin.WindowSystem.AddWindow(modwin);
+                        modwin.Toggle();
+                    }
+                }
+                ImGui.TextWrapped(thumb.name);
+
+                ImGui.Text($"By: {thumb.author}");
+
+                ImGui.Text($"{thumb.type}");
+                ImGui.Text($"Genders:{thumb.genders}");
+
+                ImGui.SameLine(0, 100);  // Adjust the padding to float it to the right
+                ImGui.Text($"9999 Views Today");
+
+                ImGui.EndGroup();
+
+            if ((modCount + 1) % 3 != 0)  //3 card layout like xivmodarchive
+            {
+                ImGui.SameLine();  
+            }
+            else
+            {
+                ImGui.NewLine();  
+            }
+
+            modCount++;
+
+        }
+       
+    }
+
     public override void Draw()
     {
-        foreach (ModThumb thumb in modThumbs)
-        {
-
-            ImGui.Text($"Mod title:{thumb.name}");
-            ImGui.Text($"Mod author:{thumb.author}");
-            ImGui.Separator();
-            //Plugin.Logger.Debug($"Starting image dl task for{thumb.url_thumb}");
-            var modThumbnail = Plugin.TextureProvider.GetFromFile(imageHandler.DownloadImage(thumb.url_thumb)).GetWrapOrDefault();
-            if (modThumbnail != null)
-            {
-                if(ImGui.ImageButton(modThumbnail.ImGuiHandle, new Vector2(modThumbnail.Width, modThumbnail.Height)))
-                {
-                    var modwin = new ModWindow(Plugin, thumb);
-                    Plugin.WindowSystem.AddWindow(modwin);
-                    modwin.Toggle();
-                }
-            }
-            ImGui.Separator();
-        }
+        DrawHomePageTable();  
     }
 }
