@@ -11,6 +11,7 @@ using Dalamud.Plugin.Services;
 using ImGuiNET;
 using Penumbra.Api.IpcSubscribers;
 using Penumbra.Api.Enums;
+using Dalamud.Utility;
 namespace ModArchiveBrowser.Windows
 {
     public class ModWindow : Window, IDisposable
@@ -19,6 +20,7 @@ namespace ModArchiveBrowser.Windows
         private Mod? mod;
         private ModHandler modHandler = new ModHandler("./ModDownloads");
         private ImageHandler imageHandler = new ImageHandler("./DownloadCache");
+        private bool failedAvatarUrl = false;
         public ModWindow(Plugin plugin): base("Mod view window##")
         {
             Plugin = plugin;
@@ -33,6 +35,7 @@ namespace ModArchiveBrowser.Windows
         public void ChangeMod(ModThumb modThumb)
         {
             this.mod = WebClient.GetModPage(modThumb);
+            failedAvatarUrl = false ;
         }
         public void Dispose()
         {
@@ -84,14 +87,29 @@ namespace ModArchiveBrowser.Windows
 
                 // Author Card
                 ImGui.Text(mod.Value.modThumb.author);
-                var authorpicThumbnail = Plugin.TextureProvider.GetFromFile(imageHandler.DownloadImage(mod.Value.url_author_profilepic)).GetWrapOrDefault();
-                if (authorpicThumbnail != null)
+                if (!failedAvatarUrl)
                 {
-                    ImGui.Image(authorpicThumbnail.ImGuiHandle, new Vector2(100, 100));
+                    var authorpicpath = imageHandler.DownloadImage(mod.Value.url_author_profilepic);
+                    if (!authorpicpath.IsNullOrEmpty())
+                    {
+                        var authorpicThumbnail = Plugin.TextureProvider.GetFromFile(authorpicpath).GetWrapOrDefault();
+                        if (authorpicThumbnail != null)
+                        {
+                            ImGui.Image(authorpicThumbnail.ImGuiHandle, new Vector2(100, 100));
+                        }
+                        else
+                        {
+                            ImGui.Button("Failed to turn user avatar into texture", new Vector2(100, 100)); // Placeholder for avatar
+                        }
+                    }
+                    else
+                    {
+                        failedAvatarUrl = true;
+                    }
                 }
                 else
                 {
-                    ImGui.Button("Failed to get user avatar", new Vector2(100, 100)); // Placeholder for avatar
+                    ImGui.Button("Failed to GET authorprofile", new Vector2(100, 100));
                 }
                 ImGui.Separator();
 
