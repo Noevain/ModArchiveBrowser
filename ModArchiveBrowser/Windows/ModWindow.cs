@@ -67,7 +67,11 @@ namespace ModArchiveBrowser.Windows
                     if(res != PenumbraApiEc.Success)
                     {
                         Plugin.Logger.Error($"Failed to install mod,code:{res.ToString()}");
-                    }
+                }
+                else
+                {
+                    Plugin.penumbra.OpenModWindow();
+                }
                 
             }
             

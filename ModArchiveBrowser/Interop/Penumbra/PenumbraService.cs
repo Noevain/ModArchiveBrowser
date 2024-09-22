@@ -56,6 +56,29 @@ namespace ModArchiveBrowser.Interop.Penumbra
                 return PenumbraApiEc.UnknownError;
             }
         }
+
+        public PenumbraApiEc OpenModWindow()
+        {
+            if (!Available)
+            {
+                return PenumbraApiEc.UnknownError;
+            }
+            else
+            {
+                try
+                {
+                    return (_openModPage!.Invoke(TabType.Mods));
+                }
+                catch (Exception ex)
+                {
+                    Plugin.Logger.Debug($"Could not open mod window:\n{ex}");
+                    return PenumbraApiEc.UnknownError;
+                }
+            }
+        }
+
+
+        
         /// <summary> Reattach to the currently running Penumbra IPC provider. Unattaches before if necessary. </summary>
         public void Reattach()
         {
