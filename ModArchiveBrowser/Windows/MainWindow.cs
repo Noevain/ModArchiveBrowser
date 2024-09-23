@@ -12,6 +12,7 @@ using Dalamud.Interface.Textures;
 using System.Net.Http.Headers;
 using ImGuizmoNET;
 using System.Drawing.Text;
+using System.Linq;
 
 namespace ModArchiveBrowser.Windows;
 
@@ -27,6 +28,7 @@ public class MainWindow : Window, IDisposable
         : base("XIV Mod Archive Browser##modarchivebrowserhome")
     {
         modThumbs = WebClient.GetHomePageMods();
+        modThumbs = modThumbs.Distinct().ToList();
         SizeConstraints = new WindowSizeConstraints
         {
             MinimumSize = new Vector2(600, 500),
