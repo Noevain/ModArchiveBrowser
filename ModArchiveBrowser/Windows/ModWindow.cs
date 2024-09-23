@@ -115,9 +115,10 @@ namespace ModArchiveBrowser.Windows
                 ImGui.Separator();
 
                 // Download button
+                if (mod.Value.url_download_button.Contains("private"))//keep it simple now but will need to be updated
+                {
                     if (ImGui.Button("Install using Penumbra"))
                     {
-                        
                         string modpath = modHandler.DownloadMod(WebClient.xivmodarchiveRoot + mod.Value.url_download_button);
                         modHandler.InstallMod(modpath);
                         /*if (res != PenumbraApiEc.Success)
@@ -130,6 +131,11 @@ namespace ModArchiveBrowser.Windows
                         }*/
 
                     }
+                }
+                else
+                {
+                    ImGui.Button("Not available(redirect to unsupported 3rd party)");
+                }
                
 
                 ImGui.Separator();
