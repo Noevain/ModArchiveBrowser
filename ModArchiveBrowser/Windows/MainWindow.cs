@@ -11,6 +11,7 @@ using HtmlAgilityPack;
 using Dalamud.Interface.Textures;
 using System.Net.Http.Headers;
 using ImGuizmoNET;
+using System.Drawing.Text;
 
 namespace ModArchiveBrowser.Windows;
 
@@ -71,7 +72,7 @@ public class MainWindow : Window, IDisposable
                 ImGui.Text($"Genders:{thumb.genders}");
 
                 ImGui.SameLine(0, 100);  // Adjust the padding to float it to the right
-                ImGui.Text($"9999 Views Today");
+                ImGui.Text($"{thumb.views}");
 
                 ImGui.EndGroup();
 

@@ -16,8 +16,9 @@ namespace ModArchiveBrowser
         public string author_url;//url to the xivmodarchive author profile:/user/XXXXXX
         public string type;
         public string genders;
+        public string views;
 
-        public ModThumb(string name, string url, string author, string url_thumb, string author_url,string type,string genders)
+        public ModThumb(string name, string url, string author, string url_thumb, string author_url,string type,string genders,string views)
         {
             this.name = name;
             this.url = url;
@@ -26,6 +27,7 @@ namespace ModArchiveBrowser
             this.author_url = author_url;
             this.type = type;
             this.genders = genders;
+            this.views = views;
         }
     }
 
@@ -173,6 +175,7 @@ namespace ModArchiveBrowser
             HtmlNodeCollection authorUrlNodes = homepage.DocumentNode.SelectNodes("//div[contains(@class, 'card-body')]//p[contains(@class, 'card-text')]//a/@href");
             HtmlNodeCollection typeNodes = homepage.DocumentNode.SelectNodes("//div[contains(@class, 'card-body')]//p[contains(@class, 'card-text')]//code[contains(text(), 'Type')]");
             HtmlNodeCollection gendersNodes = homepage.DocumentNode.SelectNodes("//div[contains(@class, 'card-body')]//p[contains(@class, 'card-text')]//code[contains(text(), 'Genders')]");
+            HtmlNodeCollection viewsNodes = homepage.DocumentNode.SelectNodes("//div[contains(@class, 'card-body')]//p[contains(@class, 'card-text')]//em[contains(text(), 'Views')]");
 
             int size = titleNodes.Count;
 
@@ -185,7 +188,8 @@ namespace ModArchiveBrowser
                 string authorUrl =  authorUrlNodes[i].GetAttributeValue("href", "none");
                 string type = typeNodes[i].InnerText;
                 string gender = gendersNodes[i].InnerText;
-                modthumbnails.Add(new ModThumb(title, modUrl, authorName, thumbUrl, authorUrl,type,gender));
+                string views = viewsNodes[i].InnerText;
+                modthumbnails.Add(new ModThumb(title, modUrl, authorName, thumbUrl, authorUrl,type,gender,views));
             }
 
             return modthumbnails;
