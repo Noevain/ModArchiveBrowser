@@ -132,6 +132,53 @@ namespace ModArchiveBrowser
 
             return modthumbnails;
         }
+
+        public static string BuildSearchURL(
+            SortBy sortBy,
+        SortOrder sortOrder,
+        string basicText = null,
+        NSFW nsfw = NSFW.False,
+        string name = null,
+        string author = null,
+        Gender? gender = null,
+        string race = null,
+        string tags = null,
+        string affects = null,
+        string comments = null,
+        DTCompatibility dtCompatibility = DTCompatibility.Compatible,
+        Types? types = null)
+        {
+            var queryParams = new Dictionary<string, string>();
+
+            // Required Parameters
+            queryParams["sortby"] = sortBy.ToString().ToLower();
+            queryParams["sortorder"] = sortOrder.ToString().ToLower();
+            queryParams["nsfw"] = nsfw == NSFW.True ? "true" : "false";
+            queryParams["dt_compat"] = ((int)dtCompatibility).ToString();
+
+            // Optional Parameters
+            if (!string.IsNullOrEmpty(basicText)) queryParams["basic_text"] = basicText;
+            if (!string.IsNullOrEmpty(name)) queryParams["name"] = name;
+            if (!string.IsNullOrEmpty(author)) queryParams["author"] = author;
+            if (gender.HasValue) queryParams["genders"] = gender.ToString().ToLower();
+            if (!string.IsNullOrEmpty(race)) queryParams["races"] = race;
+            if (!string.IsNullOrEmpty(tags)) queryParams["tags"] = tags;
+            if (!string.IsNullOrEmpty(affects)) queryParams["affects"] = affects;
+            if (!string.IsNullOrEmpty(comments)) queryParams["comments"] = comments;
+            if (types.HasValue) queryParams["types"] = ((int)types).ToString();
+
+            // Construct the URL
+            var sb = new StringBuilder("search?");
+            foreach (var param in queryParams)
+            {
+                sb.Append($"{param.Key}={param.Value}&");
+            }
+
+            // Remove the last '&'
+            sb.Length--;
+
+            return sb.ToString();
+        }
         public WebClient() {
         
         }
