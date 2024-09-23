@@ -18,7 +18,7 @@ namespace ModArchiveBrowser.Windows
     {
         private Plugin Plugin;
         private Mod? mod;
-        private ModHandler modHandler = new ModHandler("./ModDownloads");
+        private ModHandler modHandler;
         private ImageHandler imageHandler = new ImageHandler("./DownloadCache");
         private bool failedAvatarUrl = false;
         public ModWindow(Plugin plugin): base("Mod view window##")
@@ -30,6 +30,7 @@ namespace ModArchiveBrowser.Windows
                 MinimumSize = new Vector2(375, 330),
                 MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
             };
+            this.modHandler = new ModHandler("./ModDownloads",plugin);
         }
 
         public void ChangeMod(ModThumb modThumb)
@@ -116,16 +117,17 @@ namespace ModArchiveBrowser.Windows
                 // Download button
                     if (ImGui.Button("Install using Penumbra"))
                     {
+                        
                         string modpath = modHandler.DownloadMod(WebClient.xivmodarchiveRoot + mod.Value.url_download_button);
-                        PenumbraApiEc res = Plugin.penumbra.InstallMod(modpath);
-                        if (res != PenumbraApiEc.Success)
+                        modHandler.InstallMod(modpath);
+                        /*if (res != PenumbraApiEc.Success)
                         {
                             Plugin.Logger.Error($"Failed to install mod,code:{res.ToString()}");
                         }
                         else
                         {
                             Plugin.penumbra.OpenModWindow();
-                        }
+                        }*/
 
                     }
                
