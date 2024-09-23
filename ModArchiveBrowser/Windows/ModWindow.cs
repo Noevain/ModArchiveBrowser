@@ -12,6 +12,7 @@ using ImGuiNET;
 using Penumbra.Api.IpcSubscribers;
 using Penumbra.Api.Enums;
 using Dalamud.Utility;
+using ModArchiveBrowser.Utils;
 namespace ModArchiveBrowser.Windows
 {
     public class ModWindow : Window, IDisposable
