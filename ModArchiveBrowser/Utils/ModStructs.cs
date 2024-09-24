@@ -78,4 +78,44 @@ namespace ModArchiveBrowser.Utils
             this.affectReplace = affectReplace;
         }
     }
+
+    public enum Gender
+    {
+        Male,
+        Female,
+        Other
+    }
+
+    public enum Types
+    {
+        Type1 = 1,
+        Type2 = 2,
+        Type3 = 3
+    }
+
+    public enum NSFW
+    {
+        True,
+        False
+    }
+
+    public enum DTCompatibility
+    {
+        Compatible = 1,
+        NotCompatible = 0
+    }
+
+    public enum SortBy
+    {
+        Rank,
+        Date,
+        Name
+    }
+
+    public enum SortOrder
+    {
+        Asc,
+        Desc
+    }
+
 }

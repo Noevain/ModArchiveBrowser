@@ -27,6 +27,8 @@ public sealed class Plugin : IDalamudPlugin
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
 
+    private SearchWindow searchWindow { get; init; }
+
     public ModWindow modWindow { get; init; }
     public Plugin()
     {
@@ -38,11 +40,11 @@ public sealed class Plugin : IDalamudPlugin
         ConfigWindow = new ConfigWindow(this);
         modWindow = new ModWindow(this);
         MainWindow = new MainWindow(this);
-
+        searchWindow = new SearchWindow(this);
         WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
         WindowSystem.AddWindow(modWindow);
-
+        WindowSystem.AddWindow(searchWindow);
         penumbra = new PenumbraService(PluginInterface);
 
         CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
@@ -67,6 +69,7 @@ public sealed class Plugin : IDalamudPlugin
         ConfigWindow.Dispose();
         MainWindow.Dispose();
         modWindow.Dispose();
+        searchWindow.Dispose();
         CommandManager.RemoveHandler(CommandName);
     }
 
@@ -78,6 +81,6 @@ public sealed class Plugin : IDalamudPlugin
 
     private void DrawUI() => WindowSystem.Draw();
 
-    public void ToggleConfigUI() => ConfigWindow.Toggle();
+    public void ToggleConfigUI() => searchWindow.Toggle();
     public void ToggleMainUI() => MainWindow.Toggle();
 }
