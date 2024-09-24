@@ -115,9 +115,15 @@ namespace ModArchiveBrowser.Windows
 
                     // Mod Types using Enum
                     ImGui.Text("Types:");
+                    int i = 0;
                     foreach(Types type in Enum.GetValues(typeof(Types)))
                     {
+                        if(i%2 == 0)
+                        {
+                            ImGui.SameLine();
+                        }
                         DrawTypeCheckbox(type);
+                        i++;
                     }
 
                     // Sorting Options
