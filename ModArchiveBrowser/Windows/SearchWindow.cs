@@ -19,8 +19,8 @@ namespace ModArchiveBrowser.Windows
         private SortOrder selectedSortOrder = SortOrder.Desc;
         private Gender? selectedGender = null;
         private NSFW selectedNSFW = NSFW.False;
-        private DTCompatibility selectedDTCompat = DTCompatibility.Compatible;
-        private Types? selectedType = null;
+        private DTCompatibility selectedDTCompat = DTCompatibility.TexToolsCompatible;
+        private HashSet<Types> selectedType = null;
 
         private string searchQuery = "";
         private string modName = "";
@@ -114,14 +114,10 @@ namespace ModArchiveBrowser.Windows
                     selectedDTCompat = (DTCompatibility)dtCompatIndex;
 
                     // Mod Types using Enum
-                    string[] typeOptions = { "None", "Type1", "Type2", "Type3" };
-                    int typeIndex = selectedType.HasValue ? (int)selectedType.Value : 0;
-                    if (ImGui.Combo("Types", ref typeIndex, typeOptions, typeOptions.Length))
+                    ImGui.Text("Types:");
+                    foreach(Types type in Enum.GetValues(typeof(Types)))
                     {
-                        if (typeIndex > 0)
-                            selectedType = (Types)typeIndex;
-                        else
-                            selectedType = null; // None selected
+                        DrawTypeCheckbox(type);
                     }
 
                     // Sorting Options
@@ -139,6 +135,22 @@ namespace ModArchiveBrowser.Windows
             }
 
 
+        }
+
+        public void DrawTypeCheckbox(Types type)
+        {
+            bool isSelected = selectedType.Contains(type);
+            if (ImGui.Checkbox(type.ToString(),ref isSelected))
+            {
+                if (isSelected)
+                {
+                    selectedType.Add(type);
+                }
+                else
+                {
+                    selectedType.Remove(type);
+                }
+            }
         }
 
         public void DrawSearchResults()

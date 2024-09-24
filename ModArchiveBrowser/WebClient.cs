@@ -145,8 +145,8 @@ namespace ModArchiveBrowser
         string tags = null,
         string affects = null,
         string comments = null,
-        DTCompatibility dtCompatibility = DTCompatibility.Compatible,
-        Types? types = null)
+        DTCompatibility dtCompatibility = DTCompatibility.TexToolsCompatible,
+        HashSet<Types> types = null)
         {
             var queryParams = new Dictionary<string, string>();
 
@@ -165,7 +165,13 @@ namespace ModArchiveBrowser
             if (!string.IsNullOrEmpty(tags)) queryParams["tags"] = tags;
             if (!string.IsNullOrEmpty(affects)) queryParams["affects"] = affects;
             if (!string.IsNullOrEmpty(comments)) queryParams["comments"] = comments;
-            if (types.HasValue) queryParams["types"] = ((int)types).ToString();
+            
+            if (types != null && types.Count > 0)
+            {
+                // comma-separated string for url
+                var typesString = string.Join("%2C", types.Select(t => ((int)t).ToString()));
+                queryParams["types"] = typesString;
+            }
 
             // Construct the URL
             var sb = new StringBuilder("search?");

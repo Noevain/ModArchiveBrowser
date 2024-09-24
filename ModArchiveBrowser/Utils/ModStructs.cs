@@ -88,9 +88,22 @@ namespace ModArchiveBrowser.Utils
 
     public enum Types
     {
-        Type1 = 1,
-        Type2 = 2,
-        Type3 = 3
+        Gear = 1,
+        Body = 2,
+        Face = 3,
+        Hair = 4,
+        ReshadePreset = 5,
+        Other = 6,
+        Minion = 7,
+        Mount = 8,
+        Furniture = 9,
+        Skin = 10,
+        //Type11 = 11,//possibly unused?if passed alone no results and if refreshed it will be scrubbed
+        RacialScaling = 12,
+        Pose = 13,
+        VFX = 14,
+        Animation = 15,
+        Sound = 16,
     }
 
     public enum NSFW
@@ -101,8 +114,10 @@ namespace ModArchiveBrowser.Utils
 
     public enum DTCompatibility
     {
-        Compatible = 1,
-        NotCompatible = 0
+        FullyCompatible = 0,
+        TexToolsCompatible = 1,
+        PartiallyCompatible = 2,
+        NotCompatible = 3
     }
 
     public enum SortBy
