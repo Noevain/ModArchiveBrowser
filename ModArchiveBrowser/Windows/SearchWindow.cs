@@ -20,7 +20,7 @@ namespace ModArchiveBrowser.Windows
         private Gender? selectedGender = null;
         private NSFW selectedNSFW = NSFW.False;
         private DTCompatibility selectedDTCompat = DTCompatibility.TexToolsCompatible;
-        private HashSet<Types> selectedType = null;
+        private HashSet<Types> selectedType = new HashSet<Types>();
 
         private string searchQuery = "";
         private string modName = "";
