@@ -13,25 +13,23 @@ using Penumbra.Api.IpcSubscribers;
 using Penumbra.Api.Enums;
 using Dalamud.Utility;
 using ModArchiveBrowser.Utils;
+using System.IO;
 namespace ModArchiveBrowser.Windows
 {
     public class ModWindow : Window, IDisposable
     {
-        private Plugin Plugin;
+        private Plugin plugin;
         private Mod? mod;
-        private ModHandler modHandler;
-        private ImageHandler imageHandler = new ImageHandler("./DownloadCache");
+
         private bool failedAvatarUrl = false;
         public ModWindow(Plugin plugin): base("Mod view window##")
         {
-            Plugin = plugin;
-
+            this.plugin = plugin;
             SizeConstraints = new WindowSizeConstraints
             {
                 MinimumSize = new Vector2(375, 330),
                 MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
             };
-            this.modHandler = new ModHandler("./ModDownloads",plugin);
         }
 
         public void ChangeMod(ModThumb modThumb)
@@ -65,7 +63,7 @@ namespace ModArchiveBrowser.Windows
 
                 // Image Carousel Placeholder
                 ImGui.Text("Mod Preview Image");
-                var modThumbnail = Plugin.TextureProvider.GetFromFile(imageHandler.DownloadImage(mod.Value.modThumb.url_thumb)).GetWrapOrDefault();
+                var modThumbnail = Plugin.TextureProvider.GetFromFile(plugin.imageHandler.DownloadImage(mod.Value.modThumb.url_thumb)).GetWrapOrDefault();
                 if (modThumbnail != null)
                 {
                     ImGui.Image(modThumbnail.ImGuiHandle, new Vector2(300, 200)); // Placeholder for image carousel
@@ -91,7 +89,7 @@ namespace ModArchiveBrowser.Windows
                 ImGui.Text(mod.Value.modThumb.author);
                 if (!failedAvatarUrl)
                 {
-                    var authorpicpath = imageHandler.DownloadImage(mod.Value.url_author_profilepic);
+                    var authorpicpath = plugin.imageHandler.DownloadImage(mod.Value.url_author_profilepic);
                     if (!authorpicpath.IsNullOrEmpty())
                     {
                         var authorpicThumbnail = Plugin.TextureProvider.GetFromFile(authorpicpath).GetWrapOrDefault();
@@ -120,8 +118,8 @@ namespace ModArchiveBrowser.Windows
                 {
                     if (ImGui.Button("Install using Penumbra"))
                     {
-                        string modpath = modHandler.DownloadMod(WebClient.xivmodarchiveRoot + mod.Value.url_download_button);
-                        modHandler.InstallMod(modpath);
+                        string modpath = plugin.modHandler.DownloadMod(WebClient.xivmodarchiveRoot + mod.Value.url_download_button);
+                        plugin.modHandler.InstallMod(modpath);
                         /*if (res != PenumbraApiEc.Success)
                         {
                             Plugin.Logger.Error($"Failed to install mod,code:{res.ToString()}");

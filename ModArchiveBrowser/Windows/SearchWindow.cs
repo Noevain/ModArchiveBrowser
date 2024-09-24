@@ -21,6 +21,7 @@ namespace ModArchiveBrowser.Windows
         private NSFW selectedNSFW = NSFW.False;
         private DTCompatibility selectedDTCompat = DTCompatibility.TexToolsCompatible;
         private HashSet<Types> selectedType = new HashSet<Types>();
+        private Plugin plugin;
 
         private string searchQuery = "";
         private string modName = "";
@@ -33,6 +34,7 @@ namespace ModArchiveBrowser.Windows
         public SearchWindow(Plugin plugin)
         : base("XIV Mod Archive Search##modarchivebrowsersearch")
         {
+            this.plugin = plugin;
             SizeConstraints = new WindowSizeConstraints
             {
                 MinimumSize = new Vector2(600, 500),
@@ -161,12 +163,59 @@ namespace ModArchiveBrowser.Windows
 
         public void DrawSearchResults()
         {
+            int modCount = 0;
+            List<ModThumb> modThumbs = new List<ModThumb>();
+            foreach (ModThumb thumb in modThumbs)
+            {
+                ImGui.BeginGroup();
+                var modThumbnail = Plugin.TextureProvider.GetFromFile(plugin.imageHandler.DownloadImage(thumb.url_thumb)).GetWrapOrDefault();
+                if (modThumbnail != null)
+                {
+                    if (ImGui.ImageButton(modThumbnail.ImGuiHandle, new Vector2(modThumbnail.Width, modThumbnail.Height)))
+                    {
+                        try
+                        {
+                            plugin.modWindow.ChangeMod(thumb);
+                            if (!plugin.modWindow.IsOpen)
+                            {
+                                plugin.modWindow.Toggle();
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Plugin.Logger.Error($"Caught ex,changing window:{e}");
+                        }
+                    }
+                }
+                ImGui.TextWrapped(thumb.name);
 
+                ImGui.Text($"By: {thumb.author}");
+
+                ImGui.Text($"{thumb.type}");
+                ImGui.Text($"Genders:{thumb.genders}");
+
+                ImGui.SameLine(0, 100);  // Adjust the padding to float it to the right
+                ImGui.Text($"{thumb.views}");
+
+                ImGui.EndGroup();
+
+                if ((modCount + 1) % 3 != 0)  //3 card layout like xivmodarchive
+                {
+                    ImGui.SameLine();
+                }
+                else
+                {
+                    ImGui.NewLine();
+                }
+
+                modCount++;
+
+            }
         }
         public override void Draw()
         {
             DrawSearchHeader();
-            DrawSearchResults();
+            //DrawSearchResults();
         }
     }
 }

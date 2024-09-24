@@ -14,7 +14,6 @@ namespace ModArchiveBrowser
     {
         public const string xivmodarchiveRoot = "https://www.xivmodarchive.com";
         private static HtmlWeb clientInstance = null;
-
         public static HtmlWeb ClientInstance
         {
             get

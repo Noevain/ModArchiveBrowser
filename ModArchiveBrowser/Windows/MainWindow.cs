@@ -19,9 +19,8 @@ namespace ModArchiveBrowser.Windows;
 
 public class MainWindow : Window, IDisposable
 {
-    private Plugin Plugin;
+    private Plugin plugin;
     private List<ModThumb> modThumbs;
-    private ImageHandler imageHandler = new ImageHandler("./DownloadCache");
     // We give this window a hidden ID using ##
     // So that the user will see "My Amazing Window" as window title,
     // but for ImGui the ID is "My Amazing Window##With a hidden ID"
@@ -35,7 +34,7 @@ public class MainWindow : Window, IDisposable
             MinimumSize = new Vector2(600, 500),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
-        Plugin = plugin;
+        this.plugin = plugin;
     }
 
     public void Dispose() {
@@ -48,17 +47,17 @@ public class MainWindow : Window, IDisposable
         foreach (ModThumb thumb in modThumbs)
             {
                 ImGui.BeginGroup();
-                var modThumbnail = Plugin.TextureProvider.GetFromFile(imageHandler.DownloadImage(thumb.url_thumb)).GetWrapOrDefault();
+                var modThumbnail = Plugin.TextureProvider.GetFromFile(plugin.imageHandler.DownloadImage(thumb.url_thumb)).GetWrapOrDefault();
                 if (modThumbnail != null)
                 {
                     if (ImGui.ImageButton(modThumbnail.ImGuiHandle, new Vector2(modThumbnail.Width, modThumbnail.Height)))
                     {
                     try
                     {
-                        Plugin.modWindow.ChangeMod(thumb);
-                        if (!Plugin.modWindow.IsOpen)
+                        plugin.modWindow.ChangeMod(thumb);
+                        if (!plugin.modWindow.IsOpen)
                         {
-                            Plugin.modWindow.Toggle();
+                            plugin.modWindow.Toggle();
                         }
                     }
                     catch(Exception e)
