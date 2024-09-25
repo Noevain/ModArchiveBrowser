@@ -46,6 +46,14 @@ namespace ModArchiveBrowser
             return ParseModPage(page,modThumb);
         }
 
+        public static List<ModThumb> DoSearch(string searchUrl)
+        {
+            string url = xivmodarchiveRoot + '/' + searchUrl;
+            HtmlDocument page = ClientInstance.Load(url);
+            Plugin.Logger.Debug("Request made");
+            return ParseSearchResults(page);
+        }
+
         public static Mod ParseModPage(HtmlDocument page,ModThumb thumb)//I know,I know,this is ugly
         {
             string profile_pic;
@@ -130,6 +138,35 @@ namespace ModArchiveBrowser
             }
 
             return modthumbnails;
+        }
+
+        public static List<ModThumb> ParseSearchResults(HtmlDocument searchpage)
+        {
+            List<ModThumb> modthumbnails = new List<ModThumb>();
+            HtmlNodeCollection titleNodes = searchpage.DocumentNode.SelectNodes("//div[contains(@class, 'mod-card')]//h5[contains(@class, 'card-title')]");
+            HtmlNodeCollection authorNameNodes = searchpage.DocumentNode.SelectNodes("//div[contains(@class, 'mod-card')]//p[contains(@class, 'card-text')]//a[contains(@href, '/user/')]");
+            HtmlNodeCollection urlNodes = searchpage.DocumentNode.SelectNodes("//a[contains(@href, '/modid/')]/@href");
+            HtmlNodeCollection thumbUrlNodes = searchpage.DocumentNode.SelectNodes("//div[contains(@class, 'mod-card-img-container')]//img[contains(@class, 'mod-card-img')]/@src");
+            HtmlNodeCollection typeNodes = searchpage.DocumentNode.SelectNodes("//div[contains(@class, 'mod-card')]//code[contains(text(), 'Type')]");
+            HtmlNodeCollection gendersNodes = searchpage.DocumentNode.SelectNodes("//div[contains(@class, 'mod-card')]//code[contains(text(), 'Genders')]");
+            HtmlNodeCollection viewsNodes = searchpage.DocumentNode.SelectNodes("//div[contains(@class, 'mod-card')]//span[contains(@title, 'Lifetime Views')]");
+            /*HtmlNodeCollection downloadsNodes = searchpage.DocumentNode.SelectNodes("//span[contains(@class, 'emoji-block') and contains(@title, 'Downloads')]//span[contains(@class, 'count')]");
+            HtmlNodeCollection pinsNodes = searchpage.DocumentNode.SelectNodes("//span[contains(@class, 'emoji-block') and contains(@title, 'Followers')]//span[contains(@class, 'count')]");*/
+            int size = titleNodes.Count;
+            for (int i = 0; i < size; i++)
+            {
+                string title = titleNodes[i].InnerText;
+                string modUrl = urlNodes[i].GetAttributeValue("href", "none");
+                string thumbUrl = thumbUrlNodes[i].GetAttributeValue("src", "none");
+                string authorName = authorNameNodes[i].InnerText;
+                string type = typeNodes[i].InnerText;
+                string gender = gendersNodes[i].InnerText;
+                string views = viewsNodes[i].InnerText;
+                modthumbnails.Add(new ModThumb(title, modUrl, authorName, thumbUrl, "", type, gender, views));
+            }
+
+            return modthumbnails;
+
         }
 
         public static string BuildSearchURL(

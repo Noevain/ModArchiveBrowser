@@ -31,6 +31,8 @@ namespace ModArchiveBrowser.Windows
         private string modAffects = "";
         private string modComments = "";
 
+        private List<ModThumb> modThumbs = new List<ModThumb>();
+
         public SearchWindow(Plugin plugin)
         : base("XIV Mod Archive Search##modarchivebrowsersearch")
         {
@@ -72,7 +74,8 @@ namespace ModArchiveBrowser.Windows
                     types: selectedType
                 );
 
-                Plugin.Logger.Debug(url); // For demonstration purposes
+                Plugin.Logger.Debug(url);
+                this.modThumbs = WebClient.DoSearch(url);
             }
 
             // Advanced Search Toggle
@@ -164,7 +167,6 @@ namespace ModArchiveBrowser.Windows
         public void DrawSearchResults()
         {
             int modCount = 0;
-            List<ModThumb> modThumbs = new List<ModThumb>();
             foreach (ModThumb thumb in modThumbs)
             {
                 ImGui.BeginGroup();
@@ -215,7 +217,10 @@ namespace ModArchiveBrowser.Windows
         public override void Draw()
         {
             DrawSearchHeader();
-            //DrawSearchResults();
+            if (modThumbs.Count > 0)
+            {
+                DrawSearchResults();
+            }
         }
     }
 }
