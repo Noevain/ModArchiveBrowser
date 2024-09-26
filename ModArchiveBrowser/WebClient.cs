@@ -183,7 +183,8 @@ namespace ModArchiveBrowser
         string affects = null,
         string comments = null,
         DTCompatibility dtCompatibility = DTCompatibility.TexToolsCompatible,
-        HashSet<Types> types = null)
+        HashSet<Types> types = null,
+        int page = 1)
         {
             var queryParams = new Dictionary<string, string>();
 
@@ -209,7 +210,7 @@ namespace ModArchiveBrowser
                 var typesString = string.Join("%2C", types.Select(t => ((int)t).ToString()));
                 queryParams["types"] = typesString;
             }
-
+            queryParams["page"] = page.ToString();
             // Construct the URL
             var sb = new StringBuilder("search?");
             foreach (var param in queryParams)

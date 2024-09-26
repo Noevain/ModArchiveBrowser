@@ -31,7 +31,7 @@ namespace ModArchiveBrowser.Windows
         private string modTags = "";
         private string modAffects = "";
         private string modComments = "";
-
+        private int page = 1;
         private List<ModThumb> modThumbs = new List<ModThumb>();
         Dictionary<string, ISharedImmediateTexture> images = new Dictionary<string, ISharedImmediateTexture>();
         public SearchWindow(Plugin plugin)
@@ -75,6 +75,7 @@ namespace ModArchiveBrowser.Windows
             ImGui.SameLine();
             if (ImGui.Button("Search"))
             {
+                page = 1;
                 string url = WebClient.BuildSearchURL(
                     selectedSortBy,
                     selectedSortOrder,
@@ -230,7 +231,67 @@ namespace ModArchiveBrowser.Windows
                 modCount++;
 
             }
+            float windowWidth = ImGui.GetWindowWidth();
+            float buttonWidth = 100;
+
+            float centerOffset = (windowWidth - buttonWidth) * 0.5f;
+
+            // Set the cursor position to the calculated offset to center the button
+            ImGui.SetCursorPosX(centerOffset);
+            
+            if (page > 1)
+            {
+                if (ImGui.ArrowButton("SearchGoBack", ImGuiDir.Left))
+                {
+                    page = page - 1;
+                    string url = WebClient.BuildSearchURL(
+                        selectedSortBy,
+                        selectedSortOrder,
+                        basicText: searchQuery,
+                        nsfw: selectedNSFW,
+                        name: modName,
+                        author: modAuthor,
+                        gender: selectedGender,
+                        race: modRaces,
+                        tags: modTags,
+                        affects: modAffects,
+                        comments: modComments,
+                        dtCompatibility: selectedDTCompat,
+                        types: selectedType,
+                        page: page
+                    );
+
+                    Plugin.Logger.Debug(url);
+                    UpdateSearch(WebClient.DoSearch(url));
+                }
+                ImGui.SameLine();
+            }
+            
+            if (ImGui.ArrowButton("SearchGoForward", ImGuiDir.Right))
+            {
+                page = page + 1;
+                string url = WebClient.BuildSearchURL(
+                    selectedSortBy,
+                    selectedSortOrder,
+                    basicText: searchQuery,
+                    nsfw: selectedNSFW,
+                    name: modName,
+                    author: modAuthor,
+                    gender: selectedGender,
+                    race: modRaces,
+                    tags: modTags,
+                    affects: modAffects,
+                    comments: modComments,
+                    dtCompatibility: selectedDTCompat,
+                    types: selectedType,
+                    page: page
+                );
+
+                Plugin.Logger.Debug(url);
+                UpdateSearch(WebClient.DoSearch(url));
+            }
         }
+        
         public override void Draw()
         {
             DrawSearchHeader();
