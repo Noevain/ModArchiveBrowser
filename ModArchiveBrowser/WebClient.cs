@@ -37,13 +37,14 @@ namespace ModArchiveBrowser
             return ParseHomePage(homepage);
         }
         //param url should be in the format of xivmodarchive aka /modid/XXXX and not absolutes
-        public static Mod GetModPage(ModThumb modThumb)
+        public static (Mod,HtmlNodeCollection) GetModPage(ModThumb modThumb)
         {
             string url = xivmodarchiveRoot + modThumb.url;
             Plugin.Logger.Debug($"{url}");
             HtmlDocument page = ClientInstance.Load(url);
+            HtmlNodeCollection descriptionNodeStart = page.DocumentNode.SelectNodes("//div[@id='info']/div");
             Plugin.Logger.Debug("Request made");
-            return ParseModPage(page,modThumb);
+            return (ParseModPage(page,modThumb),descriptionNodeStart);
         }
 
         public static List<ModThumb> DoSearch(string searchUrl)

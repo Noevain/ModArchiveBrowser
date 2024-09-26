@@ -14,13 +14,14 @@ using Penumbra.Api.Enums;
 using Dalamud.Utility;
 using ModArchiveBrowser.Utils;
 using System.IO;
+using HtmlAgilityPack;
 namespace ModArchiveBrowser.Windows
 {
     public class ModWindow : Window, IDisposable
     {
         private Plugin plugin;
         private Mod? mod;
-
+        private HtmlNodeCollection descriptionNodes;
         private bool failedAvatarUrl = false;
         public ModWindow(Plugin plugin): base("Mod view window##")
         {
@@ -34,12 +35,75 @@ namespace ModArchiveBrowser.Windows
 
         public void ChangeMod(ModThumb modThumb)
         {
-            this.mod = WebClient.GetModPage(modThumb);
+            (this.mod,this.descriptionNodes) = WebClient.GetModPage(modThumb);
             failedAvatarUrl = false ;
         }
         public void Dispose()
         {
 
+        }
+
+        private void DrawDescHtmlFromNode(HtmlNode node)
+        {
+            switch (node.NodeType)
+            {
+                case HtmlNodeType.Text:
+                    // Reached the text of the node
+                    ImGui.TextWrapped(node.InnerText.Trim());
+                    break;
+
+                case HtmlNodeType.Element:
+                    if (node.Name == "p")
+                    {
+                        // Paragraphs
+                        foreach (var child in node.ChildNodes)
+                        {
+                            DrawDescHtmlFromNode(child);
+                        }
+                        ImGui.NewLine(); // Add space after paragraphs
+                    }
+                    else if (node.Name == "br")
+                    {
+                        // Line break
+                        ImGui.NewLine();
+                    }
+                    else if (node.Name == "a")
+                    {
+                        DrawLink(node);
+                    }
+                    else
+                    {
+                        // Others html elements for later
+                        foreach (var child in node.ChildNodes)
+                        {
+                            DrawDescHtmlFromNode(child);
+                        }
+                    }
+                    break;
+
+                default:
+                    // Keep going if node is not recognized
+                    foreach (var child in node.ChildNodes)
+                    {
+                        DrawDescHtmlFromNode(child);
+                    }
+                    break;
+            }
+        }
+
+        private void DrawLink(HtmlNode node)
+        {
+            string url = node.GetAttributeValue("href", string.Empty);
+            string linkText = node.InnerText.Trim();
+
+            // Render link text as a clickable item
+            ImGui.TextColored(new System.Numerics.Vector4(0.1f, 0.4f, 1.0f, 1.0f), linkText);
+            if (ImGui.IsItemClicked())
+            {
+                //later
+            }
+
+            ImGui.SameLine(); // Ensure links are inline
         }
 
         private void DrawModPage()
@@ -74,7 +138,7 @@ namespace ModArchiveBrowser.Windows
                 }
 
                 // Tabs (Info, Files, History)
-                ImGui.TextWrapped(mod.Value.modMeta.description);
+                DrawDescHtmlFromNode(descriptionNodes.First());
 
                 ImGui.EndChild();
             }
