@@ -59,6 +59,7 @@ public class MainWindow : Window, IDisposable
                         {
                             plugin.modWindow.Toggle();
                         }
+                        plugin.modWindow.BringToFront();
                     }
                     catch(Exception e)
                     {
