@@ -10,10 +10,13 @@ using ImGuiNET;
 using HtmlAgilityPack;
 using Dalamud.Interface.Textures;
 using System.Net.Http.Headers;
+using Dalamud.Utility;
 using ImGuizmoNET;
 using System.Drawing.Text;
 using System.Linq;
 using ModArchiveBrowser.Utils;
+using System.Threading;
+using Penumbra.Api.IpcSubscribers;
 
 namespace ModArchiveBrowser.Windows;
 
@@ -24,6 +27,7 @@ public class MainWindow : Window, IDisposable
     // We give this window a hidden ID using ##
     // So that the user will see "My Amazing Window" as window title,
     // but for ImGui the ID is "My Amazing Window##With a hidden ID"
+    Dictionary<string,ISharedImmediateTexture> images = new Dictionary<string, ISharedImmediateTexture>();
     public MainWindow(Plugin plugin)
         : base("XIV Mod Archive Browser##modarchivebrowserhome")
     {
@@ -35,19 +39,29 @@ public class MainWindow : Window, IDisposable
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
         this.plugin = plugin;
+        RebuildSharedTextures();
     }
 
     public void Dispose() {
 
     }
 
+    private void RebuildSharedTextures()
+    {
+        foreach (ModThumb modThumb in modThumbs)
+        {
+            string path = plugin.imageHandler.DownloadImage(modThumb.url_thumb);
+            ISharedImmediateTexture sharedTexture = Plugin.TextureProvider.GetFromFile(path);
+            images.Add(path, sharedTexture);
+        }
+    }
     private void DrawHomePageTable()
     {
         int modCount = 0;
         foreach (ModThumb thumb in modThumbs)
             {
                 ImGui.BeginGroup();
-                var modThumbnail = Plugin.TextureProvider.GetFromFile(plugin.imageHandler.DownloadImage(thumb.url_thumb)).GetWrapOrDefault();
+            var modThumbnail = images[plugin.imageHandler.DownloadImage(thumb.url_thumb)].GetWrapOrDefault();
                 if (modThumbnail != null)
                 {
                     if (ImGui.ImageButton(modThumbnail.ImGuiHandle, new Vector2(modThumbnail.Width, modThumbnail.Height)))
