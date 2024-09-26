@@ -97,7 +97,7 @@ namespace ModArchiveBrowser.Windows
             string linkText = node.InnerText.Trim();
 
             // Render link text as a clickable item
-            ImGui.TextColored(new System.Numerics.Vector4(0.1f, 0.4f, 1.0f, 1.0f), linkText);
+            ImGui.TextColored(new Vector4(0.1f, 0.4f, 1.0f, 1.0f), linkText);
             if (ImGui.IsItemClicked())
             {
                 //later
