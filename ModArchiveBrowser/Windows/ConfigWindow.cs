@@ -37,9 +37,10 @@ public class ConfigWindow : Window, IDisposable
             Configuration.Save();
         }
         var modCachePath = Configuration.CacheModPath;
-        if (ImGui.InputText("Mod cache part",ref modCachePath,300))
+        if (ImGui.InputText("Mod cache path",ref modCachePath,300))
         {
             Configuration.CacheModPath = modCachePath;
+            plugin.modHandler = new ModHandler(modCachePath,plugin);
         }
         ImGui.SameLine();
         if(ImGui.Button("Select Path....")){
@@ -53,7 +54,12 @@ public class ConfigWindow : Window, IDisposable
         if (ImGui.InputText("Image cache part", ref imageCachePath, 300))
         {
             Configuration.CacheModPath = imageCachePath;
+            plugin.imageHandler = new ImageHandler(imageCachePath);
         }
+
+        ImGui.NewLine();
+        ImGui.Text($"Current Image cache size:{plugin.imageHandler.CalculateFolderSizeInMB():F2}");//:F2 disp up to 2 after float point
+        ImGui.Text($"Current Mod cache size:{plugin.modHandler.CalculateFolderSizeInMB():F2}");
         // can't ref a property, so use a local copy
     }
 }
