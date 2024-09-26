@@ -10,6 +10,7 @@ using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using ModArchiveBrowser.Utils;
+using Dalamud.Interface.Textures;
 
 namespace ModArchiveBrowser.Windows
 {
@@ -32,7 +33,7 @@ namespace ModArchiveBrowser.Windows
         private string modComments = "";
 
         private List<ModThumb> modThumbs = new List<ModThumb>();
-
+        Dictionary<string, ISharedImmediateTexture> images = new Dictionary<string, ISharedImmediateTexture>();
         public SearchWindow(Plugin plugin)
         : base("XIV Mod Archive Search##modarchivebrowsersearch")
         {
@@ -46,6 +47,22 @@ namespace ModArchiveBrowser.Windows
         public void Dispose()
         {
 
+        }
+
+        private void UpdateSearch(List<ModThumb> searchRes)
+        {
+            this.modThumbs=searchRes;
+            RebuildSharedTextures();
+        }
+
+        private void RebuildSharedTextures()
+        {
+            foreach (ModThumb modThumb in modThumbs)
+            {
+                string path = plugin.imageHandler.DownloadImage(modThumb.url_thumb);
+                ISharedImmediateTexture sharedTexture = Plugin.TextureProvider.GetFromFile(path);
+                images.Add(path, sharedTexture);
+            }
         }
 
         public void DrawSearchHeader()
@@ -75,7 +92,7 @@ namespace ModArchiveBrowser.Windows
                 );
 
                 Plugin.Logger.Debug(url);
-                this.modThumbs = WebClient.DoSearch(url);
+                UpdateSearch(WebClient.DoSearch(url));
             }
 
             // Advanced Search Toggle
@@ -170,7 +187,7 @@ namespace ModArchiveBrowser.Windows
             foreach (ModThumb thumb in modThumbs)
             {
                 ImGui.BeginGroup();
-                var modThumbnail = Plugin.TextureProvider.GetFromFile(plugin.imageHandler.DownloadImage(thumb.url_thumb)).GetWrapOrDefault();
+                var modThumbnail = images[plugin.imageHandler.DownloadImage(thumb.url_thumb)].GetWrapOrDefault();
                 if (modThumbnail != null)
                 {
                     if (ImGui.ImageButton(modThumbnail.ImGuiHandle, new Vector2(modThumbnail.Width, modThumbnail.Height)))

@@ -28,7 +28,7 @@ public sealed class Plugin : IDalamudPlugin
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
 
-    private SearchWindow searchWindow { get; init; }
+    public SearchWindow searchWindow { get; init; }
 
     public FileDialogManager fileDialogManager = new FileDialogManager();
     public ModWindow modWindow { get; init; }

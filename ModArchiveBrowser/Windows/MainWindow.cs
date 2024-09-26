@@ -57,6 +57,11 @@ public class MainWindow : Window, IDisposable
     }
     private void DrawHomePageTable()
     {
+        if (ImGui.Button("Search")){
+            plugin.searchWindow.IsOpen = true;
+            plugin.searchWindow.BringToFront();
+            this.IsOpen = false;
+        }
         int modCount = 0;
         foreach (ModThumb thumb in modThumbs)
             {
