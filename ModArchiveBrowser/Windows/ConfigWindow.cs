@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Numerics;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
@@ -8,17 +8,15 @@ namespace ModArchiveBrowser.Windows;
 public class ConfigWindow : Window, IDisposable
 {
     private Configuration Configuration;
+    private Plugin plugin;
 
     // We give this window a constant ID using ###
     // This allows for labels being dynamic, like "{FPS Counter}fps###XYZ counter window",
     // and the window ID will always be "###XYZ counter window" for ImGui
     public ConfigWindow(Plugin plugin) : base("A Wonderful Configuration Window###With a constant ID")
     {
-        Flags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar |
-                ImGuiWindowFlags.NoScrollWithMouse;
-
-        Size = new Vector2(232, 90);
-        SizeCondition = ImGuiCond.Always;
+        this.plugin = plugin;
+        Size = new Vector2(400, 400);
 
         Configuration = plugin.Configuration;
     }
@@ -27,33 +25,35 @@ public class ConfigWindow : Window, IDisposable
 
     public override void PreDraw()
     {
-        // Flags must be added or removed before Draw() is being called, or they won't apply
-        if (Configuration.IsConfigWindowMovable)
-        {
-            Flags &= ~ImGuiWindowFlags.NoMove;
-        }
-        else
-        {
-            Flags |= ImGuiWindowFlags.NoMove;
-        }
+
     }
 
     public override void Draw()
     {
+        var cacheSize = Configuration.CacheSize;
+        if(ImGui.InputInt("Cache Size", ref cacheSize))
+        {
+            Configuration.CacheSize = cacheSize;
+            Configuration.Save();
+        }
+        var modCachePath = Configuration.CacheModPath;
+        if (ImGui.InputText("Mod cache part",ref modCachePath,300))
+        {
+            Configuration.CacheModPath = modCachePath;
+        }
+        ImGui.SameLine();
+        if(ImGui.Button("Select Path....")){
+            plugin.fileDialogManager.OpenFolderDialog("Pick mod cache folder", (bool somebool, string somestring) =>
+            {
+                Plugin.Logger.Debug(somebool.ToString());
+                Plugin.Logger.Debug(somestring);
+            },string.Empty,true);
+        }
+        var imageCachePath = Configuration.CacheImagePath;
+        if (ImGui.InputText("Image cache part", ref imageCachePath, 300))
+        {
+            Configuration.CacheModPath = imageCachePath;
+        }
         // can't ref a property, so use a local copy
-        var configValue = Configuration.SomePropertyToBeSavedAndWithADefault;
-        if (ImGui.Checkbox("Random Config Bool", ref configValue))
-        {
-            Configuration.SomePropertyToBeSavedAndWithADefault = configValue;
-            // can save immediately on change, if you don't want to provide a "Save and Close" button
-            Configuration.Save();
-        }
-
-        var movable = Configuration.IsConfigWindowMovable;
-        if (ImGui.Checkbox("Movable Config Window", ref movable))
-        {
-            Configuration.IsConfigWindowMovable = movable;
-            Configuration.Save();
-        }
     }
 }

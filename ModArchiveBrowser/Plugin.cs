@@ -7,6 +7,7 @@ using Dalamud.Plugin.Services;
 using ModArchiveBrowser.Windows;
 using HtmlAgilityPack;
 using ModArchiveBrowser.Interop.Penumbra;
+using Dalamud.Interface.ImGuiFileDialog;
 
 namespace ModArchiveBrowser;
 
@@ -29,18 +30,20 @@ public sealed class Plugin : IDalamudPlugin
 
     private SearchWindow searchWindow { get; init; }
 
+    public FileDialogManager fileDialogManager = new FileDialogManager();
     public ModWindow modWindow { get; init; }
 
     public ImageHandler imageHandler = null!;
     public ModHandler modHandler = null!;
+
     public Plugin()
     {
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
 
         // you might normally want to embed resources and load them from the manifest stream
         //var goatImagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");
-        imageHandler = new ImageHandler(Path.Combine(System.IO.Path.GetTempPath(), "./modarchivebrowser/imageCache"));
-        modHandler = new ModHandler(Path.Combine(System.IO.Path.GetTempPath(), "./modarchivebrowser/modCache"),this);
+        imageHandler = new ImageHandler(Configuration.CacheImagePath);
+        modHandler = new ModHandler(Configuration.CacheModPath,this);
         ConfigWindow = new ConfigWindow(this);
         modWindow = new ModWindow(this);
         MainWindow = new MainWindow(this);
@@ -85,6 +88,6 @@ public sealed class Plugin : IDalamudPlugin
 
     private void DrawUI() => WindowSystem.Draw();
 
-    public void ToggleConfigUI() => searchWindow.Toggle();
+    public void ToggleConfigUI() => ConfigWindow.Toggle();
     public void ToggleMainUI() => MainWindow.Toggle();
 }
