@@ -7,6 +7,7 @@ using Penumbra.Api;
 using Dalamud.Plugin;
 using static FFXIVClientStructs.FFXIV.Client.Game.Character.Character.Delegates;
 using Penumbra.Api.Enums;
+using Penumbra.Api.Helpers;
 
 
 namespace ModArchiveBrowser.Interop.Penumbra
@@ -24,6 +25,7 @@ namespace ModArchiveBrowser.Interop.Penumbra
         private global::Penumbra.Api.IpcSubscribers.GetModList? _getMods;
         private global::Penumbra.Api.IpcSubscribers.OpenMainWindow? _openModPage;
         private global::Penumbra.Api.IpcSubscribers.InstallMod? _installMod;
+        private readonly EventSubscriber<string, float, float>? _preSettingsTabBarDraw;
 
         private readonly IDisposable _initializedEvent;
         private readonly IDisposable _disposedEvent;
@@ -37,6 +39,7 @@ namespace ModArchiveBrowser.Interop.Penumbra
             _pluginInterface = pi;
             _initializedEvent = global::Penumbra.Api.IpcSubscribers.Initialized.Subscriber(pi, Reattach);
             _disposedEvent = global::Penumbra.Api.IpcSubscribers.Disposed.Subscriber(pi, Unattach);
+            _preSettingsTabBarDraw = global::Penumbra.Api.IpcSubscribers.PreSettingsTabBarDraw.Subscriber(pi);
             Reattach();
         }
 
