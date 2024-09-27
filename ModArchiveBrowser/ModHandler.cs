@@ -82,7 +82,7 @@ namespace ModArchiveBrowser
         {
             if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
             {
-                Console.WriteLine("Invalid file path or file does not exist.");
+                Plugin.Logger.Error("Invalid file path or file does not exist.");
                 return;
             }
 
