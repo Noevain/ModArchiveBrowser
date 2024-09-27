@@ -78,6 +78,7 @@ public sealed class Plugin : IDalamudPlugin
         modWindow.Dispose();
         searchWindow.Dispose();
         CommandManager.RemoveHandler(CommandName);
+        penumbra.Dispose();
     }
 
     private void OnCommand(string command, string args)
