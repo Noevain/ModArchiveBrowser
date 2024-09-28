@@ -76,6 +76,23 @@ namespace ModArchiveBrowser
             return totalSizeMB;
         }
 
+        public double CalculateThumbnailFolderSizeInMB()
+        {
+            if (!Directory.Exists(_thumbnailDirectory))
+            {
+                Plugin.Logger.Error("Directory does not exist.");
+                return 0;
+            }
+
+            // Get all files in the directory and sum up their sizes
+            var files = Directory.GetFiles(_thumbnailDirectory, "*", SearchOption.AllDirectories);
+            long totalSizeBytes = files.Select(file => new FileInfo(file)).Sum(fileInfo => fileInfo.Length);
+
+            // Convert the size from bytes to megabytes (1 MB = 1024 * 1024 bytes)
+            double totalSizeMB = totalSizeBytes / (1024.0 * 1024.0);
+            return totalSizeMB;
+        }
+
         public void Dispose()
         {
             plugin.Configuration.modNameToThumbnail = this._modNameToThumbnail;

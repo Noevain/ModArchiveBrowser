@@ -74,7 +74,8 @@ public class ConfigWindow : Window, IDisposable
         }
 
         ImGui.NewLine();
-        ImGui.Text($"Current Image cache size:{plugin.imageHandler.CalculateFolderSizeInMB():F2}");//:F2 disp up to 2 after float point
-        ImGui.Text($"Current Mod cache size:{plugin.modHandler.CalculateFolderSizeInMB():F2}");
+        ImGui.Text($"Current Image cache size:{plugin.imageHandler.CalculateFolderSizeInMB():F2} MB");//:F2 disp up to 2 after float point
+        ImGui.Text($"Current Mod cache size:{plugin.modHandler.CalculateFolderSizeInMB():F2} MB");
+        ImGui.Text($"Current saved thumbnails size:{plugin.modHandler.CalculateThumbnailFolderSizeInMB:F2} MB");
     }
 }
