@@ -8,6 +8,7 @@ using Dalamud.Plugin;
 using static FFXIVClientStructs.FFXIV.Client.Game.Character.Character.Delegates;
 using Penumbra.Api.Enums;
 using Penumbra.Api.Helpers;
+using Penumbra.Api.IpcSubscribers;
 
 
 namespace ModArchiveBrowser.Interop.Penumbra
@@ -25,21 +26,23 @@ namespace ModArchiveBrowser.Interop.Penumbra
         private global::Penumbra.Api.IpcSubscribers.GetModList? _getMods;
         private global::Penumbra.Api.IpcSubscribers.OpenMainWindow? _openModPage;
         private global::Penumbra.Api.IpcSubscribers.InstallMod? _installMod;
-        private readonly EventSubscriber<string, float, float>? _preSettingsTabBarDraw;
+        private EventSubscriber<string, float, float>? _preSettingsTabBarDraw;
 
         private readonly IDisposable _initializedEvent;
         private readonly IDisposable _disposedEvent;
 
+        private PenumbraWindowIntegration _windowIntegration;
         public bool Available { get; private set; }
         public int CurrentMajor { get; private set; }
         public int CurrentMinor { get; private set; }
         public DateTime AttachTime { get; private set; }
-        public PenumbraService(IDalamudPluginInterface pi)
+        public PenumbraService(IDalamudPluginInterface pi,Plugin plugin)
         {
             _pluginInterface = pi;
             _initializedEvent = global::Penumbra.Api.IpcSubscribers.Initialized.Subscriber(pi, Reattach);
             _disposedEvent = global::Penumbra.Api.IpcSubscribers.Disposed.Subscriber(pi, Unattach);
-            _preSettingsTabBarDraw = global::Penumbra.Api.IpcSubscribers.PreSettingsTabBarDraw.Subscriber(pi);
+            _windowIntegration = new PenumbraWindowIntegration(plugin);
+            _preSettingsTabBarDraw = global::Penumbra.Api.IpcSubscribers.PreSettingsTabBarDraw.Subscriber(pi,_windowIntegration.PreSettingsTabBarDraw);
             Reattach();
         }
 
@@ -115,6 +118,7 @@ namespace ModArchiveBrowser.Interop.Penumbra
                 _getMods = new global::Penumbra.Api.IpcSubscribers.GetModList(_pluginInterface);
                 _openModPage = new global::Penumbra.Api.IpcSubscribers.OpenMainWindow(_pluginInterface);
                 _installMod = new global::Penumbra.Api.IpcSubscribers.InstallMod(_pluginInterface);
+                //_preSettingsTabBarDraw = global::Penumbra.Api.IpcSubscribers.PreSettingsTabBarDraw.Subscriber(_pluginInterface, _windowIntegration.PreSettingsTabBarDraw);
                 Available = true;
                 Plugin.Logger.Debug("modarchivebrowser attached to Penumbra.");
             }
@@ -134,6 +138,7 @@ namespace ModArchiveBrowser.Interop.Penumbra
                 _installMod = null;
                 _getMods = null;
                 Available = false;
+                //_preSettingsTabBarDraw?.Dispose();
                 Plugin.Logger.Debug("modarchivebrowser detached from Penumbra.");
             }
         }
@@ -141,9 +146,12 @@ namespace ModArchiveBrowser.Interop.Penumbra
         public void Dispose()
         {
             Unattach();
+            _preSettingsTabBarDraw?.Dispose();
             _initializedEvent.Dispose();
             _disposedEvent.Dispose();
         }
+
+
 
     }
 }

@@ -12,25 +12,46 @@ using SharpCompress.Archives.Rar;
 using SharpCompress.Archives.SevenZip;
 
 using SharpCompress.Common;
+using Dalamud.Interface.Textures.TextureWraps;
+using Dalamud.Interface.Textures;
 namespace ModArchiveBrowser
 {
-    public class ModHandler
+    public class ModHandler : IDisposable
     {
         private readonly string _downloadDirectory;
+        private readonly string _thumbnailDirectory;
         private readonly HttpClient _httpClient;
         private readonly HashSet<string> _downloadedFilenames;
-        private Plugin Plugin;
+        public  Dictionary<string, string> _modNameToThumbnail;
+        public Dictionary<string,ISharedImmediateTexture> _thumbnailToTextures = new Dictionary<string, ISharedImmediateTexture>();
+        private Plugin plugin;
 
         public ModHandler(string downloadDirectory, Plugin plugin)
         {
             _downloadDirectory = downloadDirectory;
+            _thumbnailDirectory = Path.Combine(_downloadDirectory,"thumbnails");
             _httpClient = new HttpClient();
-            _downloadedFilenames = new HashSet<string>();//maybe fill this with cache dir or load from config later
-            Plugin = plugin;
+            _downloadedFilenames = plugin.Configuration.CacheFiles;
+            _modNameToThumbnail = plugin.Configuration.modNameToThumbnail;
+            this.plugin = plugin;
             // Check if it exist first
             if (!Directory.Exists(_downloadDirectory))
             {
                 Directory.CreateDirectory(_downloadDirectory);
+            }
+            UpdateTextures();
+        }
+
+        private void UpdateTextures()
+        {
+            foreach(string mod in _modNameToThumbnail.Keys)
+            {
+                if (!_thumbnailToTextures.ContainsKey(mod))
+                {
+                    var tex = Plugin.TextureProvider.GetFromFile(_modNameToThumbnail[mod]);
+                    Plugin.Logger.Debug($"Tex updated for:{mod}");
+                    _thumbnailToTextures.Add(mod, tex);
+                }
             }
         }
 
@@ -51,6 +72,14 @@ namespace ModArchiveBrowser
             return totalSizeMB;
         }
 
+        public void Dispose()
+        {
+            plugin.Configuration.modNameToThumbnail = this._modNameToThumbnail;
+            plugin.Configuration.CacheFiles = this._downloadedFilenames;
+            plugin.Configuration.Save();
+            
+        }
+
         public string DownloadMod(string modUrl)
         {
             try
@@ -64,7 +93,7 @@ namespace ModArchiveBrowser
                 byte[] modBytes = _httpClient.GetByteArrayAsync(modUrl).Result;
 
 
-                string filePath = Path.Combine(_downloadDirectory, fileName);
+                string filePath = Path.Combine(_downloadDirectory, Uri.UnescapeDataString(fileName));
                 File.WriteAllBytes(filePath, modBytes);
 
 
@@ -78,7 +107,7 @@ namespace ModArchiveBrowser
             }
         }
 
-        public void InstallMod(string filePath)
+        public void InstallMod(string filePath,string imagepath)
         {
             if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
             {
@@ -92,8 +121,10 @@ namespace ModArchiveBrowser
             if (extension == ".ttmp2" || extension == ".pmp")
             {
                 Plugin.Logger.Debug($"Installing mod directly: {filePath}");
-                Plugin.penumbra.InstallMod(filePath);
-                Plugin.penumbra.OpenModWindow();
+                plugin.penumbra.InstallMod(filePath);
+                _modNameToThumbnail.Add(Path.GetFileNameWithoutExtension(filePath), imagepath);//the penumbra mod directory will have the same name as the file
+                UpdateTextures();
+                plugin.penumbra.OpenModWindow();
             }
             //Extract .ttmp2 and .pmp files, queue everything
             else if (extension == ".zip" || extension == ".rar" || extension == ".7z")
@@ -105,8 +136,10 @@ namespace ModArchiveBrowser
                 foreach (var modFile in modFiles)
                 {
                     Plugin.Logger.Debug($"Installing extracted mod: {modFile}");
-                    Plugin.penumbra.InstallMod(modFile);
-                    Plugin.penumbra.OpenModWindow();
+                    plugin.penumbra.InstallMod(modFile);
+                    _modNameToThumbnail.Add(Path.GetFileNameWithoutExtension(filePath), imagepath);
+                    UpdateTextures();
+                    plugin.penumbra.OpenModWindow();
                 }
             }
             else
@@ -173,5 +206,6 @@ namespace ModArchiveBrowser
 
             return modFiles;
         }
+
     }
 }

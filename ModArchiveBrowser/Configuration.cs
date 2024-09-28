@@ -1,6 +1,7 @@
 using Dalamud.Configuration;
 using Dalamud.Plugin;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace ModArchiveBrowser;
@@ -14,6 +15,10 @@ public class Configuration : IPluginConfiguration
 
     public string CacheModPath { get; set; } = Path.Combine(System.IO.Path.GetTempPath(), "modarchivebrowser\\modCache");
     public string CacheImagePath { get; set; } = Path.Combine(System.IO.Path.GetTempPath(), "modarchivebrowser\\imageCache");
+
+    public HashSet<string> CacheFiles { get; set; } = new HashSet<string>();
+    public Dictionary<string, string> modNameToThumbnail = new Dictionary<string, string>();
+    public bool penumbraDispThumb = true;
 
     // the below exist just to make saving less cumbersome
     public void Save()

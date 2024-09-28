@@ -183,7 +183,7 @@ namespace ModArchiveBrowser.Windows
                     if (ImGui.Button("Install using Penumbra"))
                     {
                         string modpath = plugin.modHandler.DownloadMod(WebClient.xivmodarchiveRoot + mod.Value.url_download_button);
-                        plugin.modHandler.InstallMod(modpath);
+                        plugin.modHandler.InstallMod(modpath,plugin.imageHandler.DownloadImage(mod.Value.modThumb.url_thumb));
                         /*if (res != PenumbraApiEc.Success)
                         {
                             Plugin.Logger.Error($"Failed to install mod,code:{res.ToString()}");

@@ -52,7 +52,7 @@ public sealed class Plugin : IDalamudPlugin
         WindowSystem.AddWindow(MainWindow);
         WindowSystem.AddWindow(modWindow);
         WindowSystem.AddWindow(searchWindow);
-        penumbra = new PenumbraService(PluginInterface);
+        penumbra = new PenumbraService(PluginInterface,this);
 
         CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
         {
@@ -78,13 +78,16 @@ public sealed class Plugin : IDalamudPlugin
         modWindow.Dispose();
         searchWindow.Dispose();
         CommandManager.RemoveHandler(CommandName);
+        modHandler.Dispose();
         penumbra.Dispose();
     }
 
     private void OnCommand(string command, string args)
     {
-        // in response to the slash command, just toggle the display status of our main ui
-        ToggleMainUI();
+        foreach(string path in modHandler._modNameToThumbnail.Keys)
+        {
+            Logger.Debug(path);
+        }
     }
 
     private void DrawUI() => WindowSystem.Draw();

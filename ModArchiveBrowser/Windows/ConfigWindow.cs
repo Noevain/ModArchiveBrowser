@@ -41,6 +41,7 @@ public class ConfigWindow : Window, IDisposable
         {
             Configuration.CacheModPath = modCachePath;
             plugin.modHandler = new ModHandler(modCachePath,plugin);
+            Configuration.Save();
         }
         ImGui.SameLine();
         if(ImGui.Button("Select Path....")){
@@ -55,11 +56,19 @@ public class ConfigWindow : Window, IDisposable
         {
             Configuration.CacheModPath = imageCachePath;
             plugin.imageHandler = new ImageHandler(imageCachePath);
+            Configuration.Save();
         }
 
         ImGui.NewLine();
         ImGui.Text($"Current Image cache size:{plugin.imageHandler.CalculateFolderSizeInMB():F2}");//:F2 disp up to 2 after float point
         ImGui.Text($"Current Mod cache size:{plugin.modHandler.CalculateFolderSizeInMB():F2}");
+        ImGui.Separator();
+        var penumbraDispThumb = Configuration.penumbraDispThumb;
+        if(ImGui.Checkbox("Display mod thumbnails in Penumbra?",ref penumbraDispThumb))
+        {
+            Configuration.penumbraDispThumb = penumbraDispThumb;
+            Configuration.Save();
+        }
         // can't ref a property, so use a local copy
     }
 }
