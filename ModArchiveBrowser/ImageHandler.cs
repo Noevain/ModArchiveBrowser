@@ -41,23 +41,6 @@ namespace ModArchiveBrowser
             }
         }
 
-        public double CalculateFolderSizeInMB()
-        {
-            if (!Directory.Exists(_downloadDirectory))
-            {
-                Plugin.Logger.Error("Directory does not exist.");
-                return 0;
-            }
-
-            // Get all files in the directory and sum up their sizes
-            var files = Directory.GetFiles(_downloadDirectory, "*", SearchOption.AllDirectories);
-            long totalSizeBytes = files.Select(file => new FileInfo(file)).Sum(fileInfo => fileInfo.Length);
-
-            // Convert the size from bytes to megabytes (1 MB = 1024 * 1024 bytes)
-            double totalSizeMB = totalSizeBytes / (1024.0 * 1024.0);
-            return totalSizeMB;
-        }
-
         public string DownloadImage(string imageUrl)
         {
             try

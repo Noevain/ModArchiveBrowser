@@ -1,6 +1,7 @@
 using System;
 using System.Numerics;
 using Dalamud.Interface.Windowing;
+using ModArchiveBrowser.Utils;
 using ImGuiNET;
 
 namespace ModArchiveBrowser.Windows;
@@ -74,8 +75,8 @@ public class ConfigWindow : Window, IDisposable
         }
 
         ImGui.NewLine();
-        ImGui.Text($"Current Image cache size:{plugin.imageHandler.CalculateFolderSizeInMB():F2} MB");//:F2 disp up to 2 after float point
-        ImGui.Text($"Current Mod cache size:{plugin.modHandler.CalculateFolderSizeInMB():F2} MB");
-        ImGui.Text($"Current saved thumbnails size:{plugin.modHandler.CalculateThumbnailFolderSizeInMB:F2} MB");
+        ImGui.Text($"Current Image cache size:{StaticHelpers.CalculateFolderSizeInMB(Configuration.CacheImagePath):F2} MB");//:F2 disp up to 2 after float point
+        ImGui.Text($"Current Mod cache size:{StaticHelpers.CalculateFolderSizeInMB(Configuration.CacheModPath):F2} MB");
+        ImGui.Text($"Current saved thumbnails size:{StaticHelpers.CalculateFolderSizeInMB(Configuration.ThumbnailsFolder):F2} MB");
     }
 }
