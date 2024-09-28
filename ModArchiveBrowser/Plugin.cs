@@ -18,8 +18,6 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
     [PluginService] internal static IPluginLog Logger { get; private set; } = null!;
 
-    private const string CommandName = "/pmycommand";
-
     public Configuration Configuration { get; init; }
 
     public readonly WindowSystem WindowSystem = new("ModArchiveBrowser");
@@ -54,11 +52,18 @@ public sealed class Plugin : IDalamudPlugin
         WindowSystem.AddWindow(searchWindow);
         penumbra = new PenumbraService(PluginInterface,this);
 
-        CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
+        CommandManager.AddHandler("/archive", new CommandInfo(OnCommand)
         {
-            HelpMessage = "A useful message to display in /xlhelp"
+            HelpMessage = "Display the homepage"
         });
-
+        CommandManager.AddHandler("/modsearch", new CommandInfo(OnCommand)
+        {
+            HelpMessage = "Display the search page"
+        });
+        CommandManager.AddHandler("/archiveconfig", new CommandInfo(OnCommand)
+        {
+            HelpMessage = "Display the config page"
+        });
         PluginInterface.UiBuilder.Draw += DrawUI;
 
         // This adds a button to the plugin installer entry of this plugin which allows
@@ -77,16 +82,21 @@ public sealed class Plugin : IDalamudPlugin
         MainWindow.Dispose();
         modWindow.Dispose();
         searchWindow.Dispose();
-        CommandManager.RemoveHandler(CommandName);
+        CommandManager.RemoveHandler("/archive");
+        CommandManager.RemoveHandler("/modsearch");
+        CommandManager.RemoveHandler("/archiveconfig");
         modHandler.Dispose();
         penumbra.Dispose();
     }
 
     private void OnCommand(string command, string args)
     {
-        foreach(string path in modHandler._modNameToThumbnail.Keys)
+        switch(command)
         {
-            Logger.Debug(path);
+            case "/archive":MainWindow.Toggle();break;
+            case "/modsearch":searchWindow.Toggle();break;
+            case "/archiveconfig":ConfigWindow.Toggle();break;
+            default:break;
         }
     }
 
