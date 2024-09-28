@@ -21,7 +21,7 @@ namespace ModArchiveBrowser
         private readonly string _downloadDirectory;
         private readonly string _thumbnailDirectory;
         private readonly HttpClient _httpClient;
-        private readonly HashSet<string> _downloadedFilenames;
+        public HashSet<string> _downloadedFilenames;
         public  Dictionary<string, string> _modNameToThumbnail;
         public Dictionary<string,ISharedImmediateTexture> _thumbnailToTextures = new Dictionary<string, ISharedImmediateTexture>();
         private Plugin plugin;

@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using System.Collections.Generic;
 using Dalamud.Interface.Windowing;
 using ModArchiveBrowser.Utils;
 using ImGuiNET;
@@ -14,7 +15,7 @@ public class ConfigWindow : Window, IDisposable
     // We give this window a constant ID using ###
     // This allows for labels being dynamic, like "{FPS Counter}fps###XYZ counter window",
     // and the window ID will always be "###XYZ counter window" for ImGui
-    public ConfigWindow(Plugin plugin) : base("A Wonderful Configuration Window###With a constant ID")
+    public ConfigWindow(Plugin plugin) : base("Mod Archive Browser Config###modbrowserconfig")
     {
         this.plugin = plugin;
         Size = new Vector2(400, 400);
@@ -73,10 +74,29 @@ public class ConfigWindow : Window, IDisposable
             plugin.imageHandler = new ImageHandler(imageCachePath);
             Configuration.Save();
         }
-
-        ImGui.NewLine();
+        ImGui.Separator();
         ImGui.Text($"Current Image cache size:{StaticHelpers.CalculateFolderSizeInMB(Configuration.CacheImagePath):F2} MB");//:F2 disp up to 2 after float point
+        ImGui.SameLine();
+        if(ImGui.Button("Clear Image Cache")){
+            StaticHelpers.ClearCacheFully(Configuration.CacheImagePath);
+            plugin.imageHandler._downloadedFilenames.Clear();
+        }
         ImGui.Text($"Current Mod cache size:{StaticHelpers.CalculateFolderSizeInMB(Configuration.CacheModPath):F2} MB");
+        ImGui.SameLine();
+        if (ImGui.Button("Clear Mod Cache"))
+        {
+            StaticHelpers.ClearCacheFully(Configuration.CacheModPath);
+            plugin.modHandler._downloadedFilenames.Clear();
+        }
         ImGui.Text($"Current saved thumbnails size:{StaticHelpers.CalculateFolderSizeInMB(Configuration.ThumbnailsFolder):F2} MB");
+        ImGui.SameLine();
+        if (ImGui.Button("Clear thumbnails"))
+        {
+            Configuration.modNameToThumbnail = new Dictionary<string, string>();
+            Configuration.Save();
+            plugin.modHandler._modNameToThumbnail.Clear();
+            plugin.modHandler._thumbnailToTextures.Clear();
+            StaticHelpers.ClearCacheFully(Configuration.ThumbnailsFolder);
+        }
     }
 }

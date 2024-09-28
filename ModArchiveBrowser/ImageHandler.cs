@@ -26,7 +26,7 @@ namespace ModArchiveBrowser
     {
         private readonly string _downloadDirectory;
         private readonly HttpClient _httpClient;
-        private readonly HashSet<string> _downloadedFilenames;
+        public HashSet<string> _downloadedFilenames;
 
         public ImageHandler(string downloadDirectory)
         {

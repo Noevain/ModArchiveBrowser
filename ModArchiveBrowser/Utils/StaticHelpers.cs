@@ -32,11 +32,13 @@ namespace ModArchiveBrowser.Utils
             {
                 // Get all files in the download directory
                 var files = Directory.GetFiles(path);
+                int howmuch = 0;
                 foreach (var file in files)
                 {
                     File.Delete(file);
-                    Plugin.Logger.Debug("Deleted file: " + Path.GetFileName(file));
+                    howmuch++;
                 }
+                Plugin.Logger.Debug($"Deleted {howmuch} files");
             }
             catch (Exception ex)
             {
