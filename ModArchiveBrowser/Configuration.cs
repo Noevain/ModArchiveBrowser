@@ -16,6 +16,7 @@ public class Configuration : IPluginConfiguration
     public string CacheModPath { get; set; } = Path.Combine(System.IO.Path.GetTempPath(), "modarchivebrowser\\modCache");
     public string CacheImagePath { get; set; } = Path.Combine(System.IO.Path.GetTempPath(), "modarchivebrowser\\imageCache");
 
+    public string ThumbnailsFolder { get; set; } = Path.Combine(System.IO.Path.GetTempPath(), "modarchivebrowser\\thumbnails");
     public HashSet<string> CacheFiles { get; set; } = new HashSet<string>();
     public Dictionary<string, string> modNameToThumbnail = new Dictionary<string, string>();
     public bool penumbraDispThumb = true;

@@ -26,10 +26,10 @@ namespace ModArchiveBrowser
         public Dictionary<string,ISharedImmediateTexture> _thumbnailToTextures = new Dictionary<string, ISharedImmediateTexture>();
         private Plugin plugin;
 
-        public ModHandler(string downloadDirectory, Plugin plugin)
+        public ModHandler(string downloadDirectory,string thumbnailsDirectory, Plugin plugin)
         {
             _downloadDirectory = downloadDirectory;
-            _thumbnailDirectory = Path.Combine(_downloadDirectory,"thumbnails");
+            _thumbnailDirectory = thumbnailsDirectory;
             _httpClient = new HttpClient();
             _downloadedFilenames = plugin.Configuration.CacheFiles;
             _modNameToThumbnail = plugin.Configuration.modNameToThumbnail;
@@ -39,10 +39,14 @@ namespace ModArchiveBrowser
             {
                 Directory.CreateDirectory(_downloadDirectory);
             }
+            if (!Directory.Exists(_thumbnailDirectory))
+            {
+                Directory.CreateDirectory(_thumbnailDirectory);
+            }
             UpdateTextures();
         }
 
-        private void UpdateTextures()
+        private void UpdateTextures()//Cant call TextureProvider in PenumbraAPI so need the textures to be ready in advance
         {
             foreach(string mod in _modNameToThumbnail.Keys)
             {

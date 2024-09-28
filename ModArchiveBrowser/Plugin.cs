@@ -41,7 +41,7 @@ public sealed class Plugin : IDalamudPlugin
         // you might normally want to embed resources and load them from the manifest stream
         //var goatImagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");
         imageHandler = new ImageHandler(Configuration.CacheImagePath);
-        modHandler = new ModHandler(Configuration.CacheModPath,this);
+        modHandler = new ModHandler(Configuration.CacheModPath,Configuration.ThumbnailsFolder,this);
         ConfigWindow = new ConfigWindow(this);
         modWindow = new ModWindow(this);
         MainWindow = new MainWindow(this);

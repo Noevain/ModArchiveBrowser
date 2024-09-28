@@ -30,7 +30,21 @@ public class ConfigWindow : Window, IDisposable
 
     public override void Draw()
     {
+
+        var penumbraDispThumb = Configuration.penumbraDispThumb;
+        if (ImGui.Checkbox("Display mod thumbnails in Penumbra?", ref penumbraDispThumb))
+        {
+            Configuration.penumbraDispThumb = penumbraDispThumb;
+            Configuration.Save();
+        }
         var cacheSize = Configuration.CacheSize;
+        var thumbnailsPath = Configuration.ThumbnailsFolder;
+        if ( ImGui.InputText("Thumbnails folder",ref thumbnailsPath,300))
+        {
+            Configuration.ThumbnailsFolder = thumbnailsPath;
+            Configuration.Save();
+        }
+        ImGui.Separator();
         if(ImGui.InputInt("Cache Size", ref cacheSize))
         {
             Configuration.CacheSize = cacheSize;
@@ -40,7 +54,7 @@ public class ConfigWindow : Window, IDisposable
         if (ImGui.InputText("Mod cache path",ref modCachePath,300))
         {
             Configuration.CacheModPath = modCachePath;
-            plugin.modHandler = new ModHandler(modCachePath,plugin);
+            plugin.modHandler = new ModHandler(modCachePath,Configuration.ThumbnailsFolder,plugin);
             Configuration.Save();
         }
         ImGui.SameLine();
@@ -62,13 +76,5 @@ public class ConfigWindow : Window, IDisposable
         ImGui.NewLine();
         ImGui.Text($"Current Image cache size:{plugin.imageHandler.CalculateFolderSizeInMB():F2}");//:F2 disp up to 2 after float point
         ImGui.Text($"Current Mod cache size:{plugin.modHandler.CalculateFolderSizeInMB():F2}");
-        ImGui.Separator();
-        var penumbraDispThumb = Configuration.penumbraDispThumb;
-        if(ImGui.Checkbox("Display mod thumbnails in Penumbra?",ref penumbraDispThumb))
-        {
-            Configuration.penumbraDispThumb = penumbraDispThumb;
-            Configuration.Save();
-        }
-        // can't ref a property, so use a local copy
     }
 }
