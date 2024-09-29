@@ -16,6 +16,7 @@ using ModArchiveBrowser.Utils;
 using System.IO;
 using HtmlAgilityPack;
 using Dalamud.Interface.Utility.Raii;
+using System.Net;
 namespace ModArchiveBrowser.Windows
 {
     public class ModWindow : Window, IDisposable
@@ -52,7 +53,7 @@ namespace ModArchiveBrowser.Windows
             {
                 case HtmlNodeType.Text:
                     // Reached the text of the node
-                    ImGui.TextWrapped(node.InnerText.Trim());
+                    ImGui.TextWrapped(WebUtility.HtmlDecode(node.InnerText.Trim()));
                     break;
 
                 case HtmlNodeType.Element:
