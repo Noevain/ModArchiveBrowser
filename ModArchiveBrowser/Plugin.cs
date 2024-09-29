@@ -27,8 +27,6 @@ public sealed class Plugin : IDalamudPlugin
     private MainWindow MainWindow { get; init; }
 
     public SearchWindow searchWindow { get; init; }
-
-    public FileDialogManager fileDialogManager = new FileDialogManager();
     public ModWindow modWindow { get; init; }
 
     public ImageHandler imageHandler = null!;

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using Dalamud.Interface.Windowing;
 using ModArchiveBrowser.Utils;
 using ImGuiNET;
+using Dalamud.Interface.ImGuiFileDialog;
+using Dalamud.Interface.Utility.Raii;
 
 namespace ModArchiveBrowser.Windows;
 
@@ -11,6 +13,8 @@ public class ConfigWindow : Window, IDisposable
 {
     private Configuration Configuration;
     private Plugin plugin;
+    private FileDialogManager dialogManager = new FileDialogManager();
+    private bool _openFileDialog = false;
 
     // We give this window a constant ID using ###
     // This allows for labels being dynamic, like "{FPS Counter}fps###XYZ counter window",
@@ -30,8 +34,60 @@ public class ConfigWindow : Window, IDisposable
 
     }
 
+    private void FileDialogModCallBack(bool valid,string path)
+    {
+        if (valid)
+        {
+            Configuration.CacheModPath = path;
+            Configuration.Save();
+        }
+        else
+        {
+            Plugin.Logger.Error("Error from filedialog,invalid folder");
+        }
+        ResetFileDialog();
+    }
+
+    private void FileDialogImageCallBack(bool valid,string path)
+    {
+        if (valid)
+        {
+            Configuration.CacheImagePath = path;
+            Configuration.Save();
+        }
+        else
+        {
+            Plugin.Logger.Error("Error from filedialog,invalid folder");
+        }
+        ResetFileDialog();
+    }
+
+    private void FileDialogThumbsCallBack(bool valid, string path)
+    {
+        if (valid)
+        {
+            Configuration.ThumbnailsFolder = path;
+            Configuration.Save();
+        }
+        else
+        {
+            Plugin.Logger.Error("Error from filedialog,invalid folder");
+        }
+        ResetFileDialog();
+    }
+
+    private void ResetFileDialog()
+    {
+        _openFileDialog = false;
+        //dialogManager.Reset();
+    }
+
     public override void Draw()
     {
+        if (_openFileDialog)
+        {
+            dialogManager.Draw();
+        }
 
         var penumbraDispThumb = Configuration.penumbraDispThumb;
         if (ImGui.Checkbox("Display mod thumbnails in Penumbra?", ref penumbraDispThumb))
@@ -45,6 +101,12 @@ public class ConfigWindow : Window, IDisposable
         {
             Configuration.ThumbnailsFolder = thumbnailsPath;
             Configuration.Save();
+        }
+        ImGui.SameLine();
+        if (ImGui.Button("Select Path...."))
+        {
+            dialogManager.OpenFolderDialog("Pick thumbnails folder", FileDialogThumbsCallBack, string.Empty, true);
+            _openFileDialog = true;
         }
         ImGui.Separator();
         if(ImGui.InputInt("Cache Size", ref cacheSize))
@@ -61,11 +123,9 @@ public class ConfigWindow : Window, IDisposable
         }
         ImGui.SameLine();
         if(ImGui.Button("Select Path....")){
-            plugin.fileDialogManager.OpenFolderDialog("Pick mod cache folder", (bool somebool, string somestring) =>
-            {
-                Plugin.Logger.Debug(somebool.ToString());
-                Plugin.Logger.Debug(somestring);
-            },string.Empty,true);
+            dialogManager.OpenFolderDialog("Pick mod cache folder",FileDialogModCallBack,string.Empty,true);
+            _openFileDialog = true;
+            Plugin.Logger.Debug("hello....");
         }
         var imageCachePath = Configuration.CacheImagePath;
         if (ImGui.InputText("Image cache part", ref imageCachePath, 300))
@@ -73,6 +133,12 @@ public class ConfigWindow : Window, IDisposable
             Configuration.CacheModPath = imageCachePath;
             plugin.imageHandler = new ImageHandler(imageCachePath);
             Configuration.Save();
+        }
+        ImGui.SameLine();
+        if (ImGui.Button("Select Path...."))
+        {
+            dialogManager.OpenFolderDialog("Pick image cache folder", FileDialogImageCallBack, string.Empty, true);
+            _openFileDialog = true;
         }
         ImGui.Separator();
         ImGui.Text($"Current Image cache size:{StaticHelpers.CalculateFolderSizeInMB(Configuration.CacheImagePath):F2} MB");//:F2 disp up to 2 after float point
