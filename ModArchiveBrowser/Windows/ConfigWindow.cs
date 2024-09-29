@@ -79,7 +79,7 @@ public class ConfigWindow : Window, IDisposable
     private void ResetFileDialog()
     {
         _openFileDialog = false;
-        //dialogManager.Reset();
+        dialogManager.Reset();
     }
 
     public override void Draw()
@@ -103,7 +103,7 @@ public class ConfigWindow : Window, IDisposable
             Configuration.Save();
         }
         ImGui.SameLine();
-        if (ImGui.Button("Select Path...."))
+        if (ImGui.Button("Select Path....###thumbcachepath"))
         {
             dialogManager.OpenFolderDialog("Pick thumbnails folder", FileDialogThumbsCallBack, string.Empty, true);
             _openFileDialog = true;
@@ -122,10 +122,9 @@ public class ConfigWindow : Window, IDisposable
             Configuration.Save();
         }
         ImGui.SameLine();
-        if(ImGui.Button("Select Path....")){
+        if(ImGui.Button("Select Path....###modcachepath")){
             dialogManager.OpenFolderDialog("Pick mod cache folder",FileDialogModCallBack,string.Empty,true);
             _openFileDialog = true;
-            Plugin.Logger.Debug("hello....");
         }
         var imageCachePath = Configuration.CacheImagePath;
         if (ImGui.InputText("Image cache part", ref imageCachePath, 300))
@@ -135,7 +134,7 @@ public class ConfigWindow : Window, IDisposable
             Configuration.Save();
         }
         ImGui.SameLine();
-        if (ImGui.Button("Select Path...."))
+        if (ImGui.Button("Select Path....###imagecachepath"))
         {
             dialogManager.OpenFolderDialog("Pick image cache folder", FileDialogImageCallBack, string.Empty, true);
             _openFileDialog = true;
