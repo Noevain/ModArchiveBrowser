@@ -15,6 +15,7 @@ using Dalamud.Utility;
 using ModArchiveBrowser.Utils;
 using System.IO;
 using HtmlAgilityPack;
+using Dalamud.Interface.Utility.Raii;
 namespace ModArchiveBrowser.Windows
 {
     public class ModWindow : Window, IDisposable
@@ -23,6 +24,8 @@ namespace ModArchiveBrowser.Windows
         private Mod? mod;
         private HtmlNodeCollection descriptionNodes;
         private bool failedAvatarUrl = false;
+        private bool _isLoading = false;
+        private string _statusMessage = string.Empty;
         public ModWindow(Plugin plugin): base("Mod view window##")
         {
             this.plugin = plugin;
@@ -106,8 +109,44 @@ namespace ModArchiveBrowser.Windows
             ImGui.SameLine(); // Ensure links are inline
         }
 
+        private void StartInstall()
+        {
+            _isLoading = true;
+            Task.Run(() =>
+            {
+                _statusMessage = "Downloading...";
+                string modpath = plugin.modHandler.DownloadModAsync(WebClient.xivmodarchiveRoot + mod.Value.url_download_button).Result;
+                _statusMessage = "Installing...";
+                plugin.modHandler.InstallMod(modpath, plugin.imageHandler.DownloadImage(mod.Value.modThumb.url_thumb));
+
+            }).ContinueWith(task => { _isLoading = false; });
+        }
+
+        private void DrawLoading()
+        {
+            using var loadingChild = ImRaii.Child("###modbrowserinstallingLoadingFrame", new Vector2(-1, -1), false);
+            if (loadingChild)
+            {
+                ImGui.GetWindowDrawList().PushClipRectFullScreen();
+                ImGui.GetWindowDrawList().AddRectFilled(
+                    ImGui.GetWindowPos() + new Vector2(0, (ImGui.GetFontSize() + (ImGui.GetStyle().FramePadding.Y * 2))),
+                    ImGui.GetWindowPos() + ImGui.GetWindowSize(),
+                    0xCC000000,
+                    ImGui.GetStyle().WindowRounding,
+                    ImDrawFlags.RoundCornersBottom);
+                ImGui.PopClipRect();
+
+                ImGui.SetCursorPosY(ImGui.GetWindowSize().Y / 2);
+                StaticHelpers.CenteredText(_statusMessage);
+            }
+        }
+
         private void DrawModPage()
         {
+            if (_isLoading)
+            {
+                DrawLoading();
+            }
 
             // DT compatiblity
             ImGui.TextColored(new Vector4(0.0f, 1.0f, 0.0f, 1.0f), "DT Compatibility: ✅ This mod is compatible with Dawntrail.");
@@ -182,16 +221,7 @@ namespace ModArchiveBrowser.Windows
                 {
                     if (ImGui.Button("Install using Penumbra"))
                     {
-                        string modpath = plugin.modHandler.DownloadMod(WebClient.xivmodarchiveRoot + mod.Value.url_download_button);
-                        plugin.modHandler.InstallMod(modpath,plugin.imageHandler.DownloadImage(mod.Value.modThumb.url_thumb));
-                        /*if (res != PenumbraApiEc.Success)
-                        {
-                            Plugin.Logger.Error($"Failed to install mod,code:{res.ToString()}");
-                        }
-                        else
-                        {
-                            Plugin.penumbra.OpenModWindow();
-                        }*/
+                        StartInstall();
 
                     }
                 }

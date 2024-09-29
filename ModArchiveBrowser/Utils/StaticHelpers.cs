@@ -1,3 +1,4 @@
+using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -45,5 +46,24 @@ namespace ModArchiveBrowser.Utils
                 Plugin.Logger.Debug("Error deleting files: " + ex.Message);
             }
         }
+
+        public static void CenteredText(string text)
+        {
+            CenterCursorForText(text);
+            ImGui.TextUnformatted(text);
+        }
+
+        /// <summary>
+        /// Center the ImGui cursor for a certain text.
+        /// </summary>
+        /// <param name="text">The text to center for.</param>
+        public static void CenterCursorForText(string text) => CenterCursorFor(ImGui.CalcTextSize(text).X);
+
+        /// <summary>
+        /// Center the ImGui cursor for an item with a certain width.
+        /// </summary>
+        /// <param name="itemWidth">The width to center for.</param>
+        public static void CenterCursorFor(float itemWidth) =>
+            ImGui.SetCursorPosX((int)((ImGui.GetWindowWidth() - itemWidth) / 2));
     }
 }

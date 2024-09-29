@@ -25,7 +25,6 @@ namespace ModArchiveBrowser
         public  Dictionary<string, string> _modNameToThumbnail;
         public Dictionary<string,ISharedImmediateTexture> _thumbnailToTextures = new Dictionary<string, ISharedImmediateTexture>();
         private Plugin plugin;
-
         public ModHandler(string downloadDirectory,string thumbnailsDirectory, Plugin plugin)
         {
             _downloadDirectory = downloadDirectory;
@@ -84,6 +83,34 @@ namespace ModArchiveBrowser
             
         }
 
+        public async Task<string> DownloadModAsync(string modUrl)
+        {
+            try
+            {
+                string fileName = Path.GetFileName(new Uri(modUrl).AbsolutePath);
+
+                if (_downloadedFilenames.Contains(fileName))
+                {
+                    return Path.Combine(_downloadDirectory, fileName);
+                }
+                using (HttpResponseMessage response = await _httpClient.GetAsync(modUrl, HttpCompletionOption.ResponseHeadersRead))
+                {
+                    response.EnsureSuccessStatusCode();
+
+                    long totalBytes = response.Content.Headers.ContentLength ?? -1;//if header has no contentlength field
+                    var modBytes = await response.Content.ReadAsByteArrayAsync();
+                    string filePath = Path.Combine(_downloadDirectory, Uri.UnescapeDataString(fileName));
+                    await File.WriteAllBytesAsync(filePath, modBytes);
+                    _downloadedFilenames.Add(fileName);
+                return filePath;
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.Error($"Failed to download mod: {modUrl}. Error: {ex.Message}");
+                return null;
+            }
+        }
         public string DownloadMod(string modUrl)
         {
             try
