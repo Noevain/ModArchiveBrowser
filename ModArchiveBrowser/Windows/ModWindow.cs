@@ -230,7 +230,7 @@ namespace ModArchiveBrowser.Windows
                 else
                 {
                     ImGui.BeginDisabled();
-                    ImGui.Button("Not available(redirect to unsupported 3rd party)");
+                    ImGui.Button("Not available");
                     ImGui.EndDisabled();
                 }
                 
