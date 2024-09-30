@@ -160,10 +160,10 @@ namespace ModArchiveBrowser
             int size = titleNodes.Count;
             for (int i = 0; i < size; i++)
             {
-                string title = titleNodes[i].InnerText;
+                string title = WebUtility.HtmlDecode(titleNodes[i].InnerText);
                 string modUrl = urlNodes[i].GetAttributeValue("href", "none");
                 string thumbUrl = thumbUrlNodes[i].GetAttributeValue("src", "none");
-                string authorName = authorNameNodes[i].InnerText;
+                string authorName = WebUtility.HtmlDecode(authorNameNodes[i].InnerText);
                 string type = typeNodes[i].InnerText;
                 string gender = gendersNodes[i].InnerText;
                 string views = viewsNodes[i].InnerText;
