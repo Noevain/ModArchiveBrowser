@@ -22,7 +22,7 @@ public class ConfigWindow : Window, IDisposable
     public ConfigWindow(Plugin plugin) : base("Mod Archive Browser Config###modbrowserconfig")
     {
         this.plugin = plugin;
-        Size = new Vector2(400, 400);
+        Size = new Vector2(600, 400);
 
         Configuration = plugin.Configuration;
     }
