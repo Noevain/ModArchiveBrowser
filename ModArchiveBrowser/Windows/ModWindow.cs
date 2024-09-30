@@ -17,6 +17,7 @@ using System.IO;
 using HtmlAgilityPack;
 using Dalamud.Interface.Utility.Raii;
 using System.Net;
+using System.Diagnostics;
 namespace ModArchiveBrowser.Windows
 {
     public class ModWindow : Window, IDisposable
@@ -228,9 +229,16 @@ namespace ModArchiveBrowser.Windows
                 }
                 else
                 {
+                    ImGui.BeginDisabled();
                     ImGui.Button("Not available(redirect to unsupported 3rd party)");
+                    ImGui.EndDisabled();
                 }
-               
+                
+                ImGui.SameLine();
+                if(ImGui.Button("Open in browser"))
+                {
+                    Process.Start(new ProcessStartInfo(WebClient.xivmodarchiveRoot + mod.Value.modThumb.url) { UseShellExecute = true });
+                }
 
                 ImGui.Separator();
 
