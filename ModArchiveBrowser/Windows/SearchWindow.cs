@@ -212,7 +212,7 @@ namespace ModArchiveBrowser.Windows
                 ImGui.Text($"By: {thumb.author}");
 
                 ImGui.Text($"{thumb.type}");
-                ImGui.Text($"Genders:{thumb.genders}");
+                ImGui.Text($"{thumb.genders}");
 
                 ImGui.SameLine(0, 100);  // Adjust the padding to float it to the right
                 ImGui.Text($"{thumb.views}");
