@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ModArchiveBrowser.Utils;
 using HtmlAgilityPack;
 using System.Net;
+using System.IO;
 
 namespace ModArchiveBrowser
 {
@@ -22,6 +23,8 @@ namespace ModArchiveBrowser
                 if (clientInstance == null)
                 {
                     clientInstance = new HtmlWeb();
+                    clientInstance.CachePath = Path.Combine(System.IO.Path.GetTempPath(), "modarchivebrowser\\htmlcache");
+                    clientInstance.UsingCache = true;
                     return clientInstance;
                 }
                 else
