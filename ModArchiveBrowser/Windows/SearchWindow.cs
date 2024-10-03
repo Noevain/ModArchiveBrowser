@@ -113,8 +113,8 @@ namespace ModArchiveBrowser.Windows
                 if (ImGui.BeginChild("rightsearch", new Vector2(200, 0), true))
                 {
                     // Gender Selection using Enum
-                    string[] genderOptions = { "Male", "Female", "Other", "None" };
-                    int genderIndex = selectedGender.HasValue ? (int)selectedGender.Value : 3; // 'None' is the last option
+                    string[] genderOptions = { "Male", "Female", "Unisex", "Any" };
+                    int genderIndex = selectedGender.HasValue ? (int)selectedGender.Value : 3; // 'Any' is the last option
                     if (ImGui.Combo("Gender", ref genderIndex, genderOptions, genderOptions.Length))
                     {
                         if (genderIndex < 3) // Valid gender selected
@@ -150,7 +150,7 @@ namespace ModArchiveBrowser.Windows
                     }
 
                     // Sorting Options
-                    string[] sortByOptions = { "Rank", "Date", "Name" };
+                    string[] sortByOptions = { "Relevance", "Release Date", "Name" };
                     int sortByIndex = (int)selectedSortBy;
                     ImGui.Combo("Sort By", ref sortByIndex, sortByOptions, sortByOptions.Length);
                     selectedSortBy = (SortBy)sortByIndex;

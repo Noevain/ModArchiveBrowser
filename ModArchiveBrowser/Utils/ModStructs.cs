@@ -83,7 +83,7 @@ namespace ModArchiveBrowser.Utils
     {
         Male,
         Female,
-        Other
+        Unisex
     }
 
     public enum Types
@@ -123,7 +123,7 @@ namespace ModArchiveBrowser.Utils
     public enum SortBy
     {
         Rank,
-        Date,
+        Time_posted,
         Name
     }
 
