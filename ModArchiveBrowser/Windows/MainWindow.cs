@@ -52,7 +52,7 @@ public class MainWindow : Window, IDisposable
         {
             string path = plugin.imageHandler.DownloadImage(modThumb.url_thumb);
             ISharedImmediateTexture sharedTexture = Plugin.TextureProvider.GetFromFile(path);
-            images.Add(path, sharedTexture);
+            images.TryAdd(path, sharedTexture);
         }
     }
     private void DrawHomePageTable()
