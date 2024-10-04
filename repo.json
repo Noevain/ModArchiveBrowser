@@ -1,4 +1,4 @@
-{
+[
     {
         "Author": "Noevain",
         "Name": "XIV Mod Archive Browser",
@@ -21,4 +21,4 @@
         "DownloadLinkUpdate": "https://github.com/Noevain/ModArchiveBrowser/releases/download/v0.0.0.1/ModArchiveBrowser.zip",
         "IconUrl": "https://raw.githubusercontent.com/Noevain/ModArchiveBrowser/master/images/icon.png"
     }
-}
+]
