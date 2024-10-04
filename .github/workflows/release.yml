@@ -29,18 +29,18 @@ jobs:
       - name: write version into jsons
         run: |
           $ver = '${{ github.ref_name }}'
-          $path = './ModArchiveBrowser/bin/x64/Release/ModArchiveBrowser.json'
+          $path = './ModArchiveBrowser/bin/Release/ModArchiveBrowser.json'
           $json = Get-Content -Raw $path | ConvertFrom-Json
           $json.AssemblyVersion = $ver
           $content = $json | ConvertTo-Json
           set-content -Path $path -Value $content
       - name: Archive
-        run: Compress-Archive -Path /ModArchiveBrowser/bin/x64/Release/* -DestinationPath ModArchiveBrowser.zip
+        run: Compress-Archive -Path /ModArchiveBrowser/bin/Release/* -DestinationPath ModArchiveBrowser.zip
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
         with:
           path: |
-            ./ModArchiveBrowser/bin/x64/Release/*
+            ./ModArchiveBrowser/bin/Release/*
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
