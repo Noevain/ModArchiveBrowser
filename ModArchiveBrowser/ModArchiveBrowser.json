@@ -2,7 +2,7 @@
     "Author": "Noevain",
     "Name": "XIV Mod Archive Browser",
     "InternalName": "ModArchiveBrowser",
-    "AssemblyVersion": "0.0.1.0",
+    "AssemblyVersion": "0.3.0",
     "Description": "Lets you browse and install mods in 1 click from www.xivmodarchive.com and add the modthumbnail in Penumbra",
     "ApplicableVersion": "any",
     "Tags": [
