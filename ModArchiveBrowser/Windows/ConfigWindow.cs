@@ -109,11 +109,11 @@ public class ConfigWindow : Window, IDisposable
             _openFileDialog = true;
         }
         ImGui.Separator();
-        if(ImGui.InputInt("Cache Size", ref cacheSize))
+        /*if(ImGui.InputInt("Cache Size", ref cacheSize))
         {
             Configuration.CacheSize = cacheSize;
             Configuration.Save();
-        }
+        }*/
         var modCachePath = Configuration.CacheModPath;
         if (ImGui.InputText("Mod cache path",ref modCachePath,300))
         {
