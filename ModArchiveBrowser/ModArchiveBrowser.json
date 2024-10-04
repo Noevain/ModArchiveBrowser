@@ -1,12 +1,20 @@
 {
     "Author": "Noevain",
     "Name": "XIV Mod Archive Browser",
-    "Punchline": "Browse and install mods from the comfort of your FFXIV house ",
+    "InternalName": "ModArchiveBrowser",
+    "AssemblyVersion": "0.0.1.0",
     "Description": "Lets you browse and install mods in 1 click from www.xivmodarchive.com and add the modthumbnail in Penumbra",
     "ApplicableVersion": "any",
     "Tags": [
         "browser",
         "plugin",
         "mods"
-    ]
+    ],
+    "DalamudApiLevel": 10,
+    "LoadRequiredState": 0,
+    "LoadSync": false,
+    "CanUnloadAsync": false,
+    "LoadPriority": 0,
+    "Punchline": "Browse and install mods from the comfort of your FFXIV house ",
+    "AcceptsFeedback": true
 }
