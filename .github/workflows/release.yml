@@ -29,7 +29,7 @@ jobs:
       - name: write version into jsons
         run: |
           $ver = '${{ github.ref_name }}'
-          $path = './ModArchiveBrowser/bin/x64/Release/ModArchiveBrowser.json'
+          $path = './ModArchiveBrowser/bin/Release/ModArchiveBrowser.json'
           $json = Get-Content -Raw $path | ConvertFrom-Json
           $json.AssemblyVersion = $ver
           $content = $json | ConvertTo-Json
@@ -40,7 +40,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: |
-            ./ModArchiveBrowser/bin/x64/Release/*
+            ./ModArchiveBrowser/bin/Release/*
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
