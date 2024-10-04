@@ -125,11 +125,12 @@ namespace ModArchiveBrowser.Windows
 
                     // NSFW Toggle
                     bool nsfwSelected = selectedNSFW == NSFW.True;
+                    ImGui.BeginDisabled();
                     if (ImGui.Checkbox("NSFW", ref nsfwSelected))
                     {
                         selectedNSFW = nsfwSelected ? NSFW.True : NSFW.False;
                     }
-
+                    ImGui.EndDisabled();
                     // DT Compatibility Dropdown
                     string[] dtCompatOptions = { "Compatible", "Not Compatible" };
                     int dtCompatIndex = (int)selectedDTCompat;
