@@ -49,7 +49,7 @@ namespace ModArchiveBrowser.Windows
 
         }
 
-        private void UpdateSearch(List<ModThumb> searchRes)
+        public void UpdateSearch(List<ModThumb> searchRes)
         {
             this.modThumbs=searchRes;
             RebuildSharedTextures();

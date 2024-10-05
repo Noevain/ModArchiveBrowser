@@ -15,6 +15,9 @@ namespace ModArchiveBrowser
     internal class WebClient
     {
         public const string xivmodarchiveRoot = "https://www.xivmodarchive.com";
+        public const string new_and_updated_from_patreon_subs = "search?nsfl=false&sponsored=true&dt_compat=1&sortby=time_edited&sortorder=desc";
+        public const string today_most_viewed = "search?nsfl=false&dt_compat=1&sortby=views_today&sortorder=desc";
+        public const string newest_mods_from_all_users = "search?nsfl=false&dt_compat=1&sortby=time_published&sortorder=desc";
         private static HtmlWeb clientInstance = null;
         public static HtmlWeb ClientInstance
         {
