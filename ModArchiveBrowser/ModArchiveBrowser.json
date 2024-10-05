@@ -12,6 +12,7 @@
     ],
     "DalamudApiLevel": 10,
     "LoadRequiredState": 0,
+    "IconUrl": "https://raw.githubusercontent.com/noevain/ModArchiveBrowser/master/images/icon.png",
     "LoadSync": false,
     "CanUnloadAsync": false,
     "LoadPriority": 0,
