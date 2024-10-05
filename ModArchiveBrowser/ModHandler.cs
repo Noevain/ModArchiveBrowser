@@ -62,7 +62,7 @@ namespace ModArchiveBrowser
         {
             if (!Directory.Exists(_downloadDirectory))
             {
-                Plugin.Logger.Error("Directory does not exist.");
+                //Plugin.Logger.Error("Directory does not exist.");
                 return 0;
             }
 
@@ -107,7 +107,7 @@ namespace ModArchiveBrowser
             }
             catch (Exception ex)
             {
-                Plugin.Logger.Error($"Failed to download mod: {modUrl}. Error: {ex.Message}");
+                Plugin.ReportError($"Failed to download mod: {modUrl}. Check /xllog for details",ex);
                 return null;
             }
         }
@@ -133,7 +133,7 @@ namespace ModArchiveBrowser
             }
             catch (Exception ex)
             {
-                Plugin.Logger.Error($"Failed to download mod: {modUrl}. Error: {ex.Message}");
+                Plugin.ReportError($"Failed to download mod: {modUrl}. Check /xllog for details", ex);
                 return null;
             }
         }
@@ -142,7 +142,7 @@ namespace ModArchiveBrowser
         {
             if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
             {
-                Plugin.Logger.Error("Invalid file path or file does not exist.");
+                Plugin.ReportError("Invalid file path or file does not exist.",null);
                 return;
             }
 
@@ -175,7 +175,7 @@ namespace ModArchiveBrowser
             }
             else
             {
-                Plugin.Logger.Error($"Unsupported file format: {extension}");
+                Plugin.ReportError($"Unsupported file format: {extension}",null);
             }
         }
 

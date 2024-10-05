@@ -66,7 +66,7 @@ namespace ModArchiveBrowser
             }
             catch (Exception ex)
             {
-                Plugin.Logger.Error($"Failed to download image: {imageUrl}. Error: {ex.Message}");
+                //Plugin.ReportError($"Failed to download image: {imageUrl}. Error: {ex.Message}",ex);
                 return string.Empty;
             }
         }

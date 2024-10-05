@@ -14,7 +14,7 @@ namespace ModArchiveBrowser.Utils
         {
             if (!Directory.Exists(path))
             {
-                Plugin.Logger.Error("Directory does not exist.");
+                //Plugin.ReportError("Directory does not exist.",null);
                 return 0;
             }
 

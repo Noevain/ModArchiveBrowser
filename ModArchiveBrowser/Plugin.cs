@@ -9,6 +9,8 @@ using HtmlAgilityPack;
 using ModArchiveBrowser.Interop.Penumbra;
 using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Utility;
+using Dalamud.Game.Text.SeStringHandling;
+using System;
 
 namespace ModArchiveBrowser;
 
@@ -18,6 +20,8 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static ITextureProvider TextureProvider { get; private set; } = null!;
     [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
     [PluginService] internal static IPluginLog Logger { get; private set; } = null!;
+
+    [PluginService] internal static IChatGui ChatGui { get; private set; } = null!;
 
     public Configuration Configuration { get; init; }
 
@@ -77,6 +81,16 @@ public sealed class Plugin : IDalamudPlugin
         PluginInterface.UiBuilder.OpenMainUi += ToggleMainUI;
     }
 
+    public static void ReportError(string msg,Exception? ex)
+    {
+        SeStringBuilder sb = new SeStringBuilder().AddText("[ModArchiveBroser] Error:"+msg);
+        ChatGui.PrintError(sb.BuiltString);
+        if (ex is not null)
+        {
+            Plugin.Logger.Error(ex.ToString());
+        }
+    }
+
     public void Dispose()
     {
         WindowSystem.RemoveAllWindows();
@@ -108,7 +122,7 @@ public sealed class Plugin : IDalamudPlugin
                 }
                 else
                 {
-                    Plugin.Logger.Error("No argument");
+                    ReportError("No argument",null);
                 }
                 break;
             default:break;

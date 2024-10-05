@@ -82,7 +82,7 @@ public class MainWindow : Window, IDisposable
                     }
                     catch(Exception e)
                     {
-                        Plugin.Logger.Error($"Caught ex,changing window:{e}");
+                        Plugin.ReportError("Error while loading mod,check /xllog for details", e);
                     }
                     }
                 }

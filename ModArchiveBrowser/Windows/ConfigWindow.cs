@@ -43,7 +43,7 @@ public class ConfigWindow : Window, IDisposable
         }
         else
         {
-            Plugin.Logger.Error("Error from filedialog,invalid folder");
+            Plugin.ReportError("Error from filedialog,invalid folder", null);
         }
         ResetFileDialog();
     }
@@ -57,7 +57,7 @@ public class ConfigWindow : Window, IDisposable
         }
         else
         {
-            Plugin.Logger.Error("Error from filedialog,invalid folder");
+            Plugin.ReportError("Error from filedialog,invalid folder", null);
         }
         ResetFileDialog();
     }
@@ -71,7 +71,7 @@ public class ConfigWindow : Window, IDisposable
         }
         else
         {
-            Plugin.Logger.Error("Error from filedialog,invalid folder");
+            Plugin.ReportError("Error from filedialog,invalid folder", null);
         }
         ResetFileDialog();
     }
