@@ -29,6 +29,7 @@ namespace ModArchiveBrowser.Windows
         private bool failedAvatarUrl = false;
         private bool _isLoading = false;
         private string _statusMessage = string.Empty;
+        private bool lastNodeWasBr = false;
         public ModWindow(Plugin plugin): base("Mod view window##")
         {
             this.plugin = plugin;
@@ -62,26 +63,44 @@ namespace ModArchiveBrowser.Windows
                 case HtmlNodeType.Text:
                     // Reached the text of the node
                     ImGui.TextWrapped(WebUtility.HtmlDecode(node.InnerText.Trim()));
+                    lastNodeWasBr = false;
                     break;
 
                 case HtmlNodeType.Element:
                     if (node.Name == "p")
                     {
-                        // Paragraphs
-                        foreach (var child in node.ChildNodes)
+                        bool isLead = node.GetAttributeValue("class", string.Empty).Contains("lead");
+
+                        if (isLead)
                         {
-                            DrawDescHtmlFromNode(child);
+                            // Make text larger for lead paragraphs
+                            ImGui.TextWrapped(node.InnerText.Trim());
+                            //gotta do something with fonts,I'll figure it out later
+                        }
+                        else
+                        {
+                            // Paragraphs
+                            foreach (var child in node.ChildNodes)
+                            {
+                                DrawDescHtmlFromNode(child);
+                            }
                         }
                         ImGui.NewLine(); // Add space after paragraphs
+                        lastNodeWasBr = false;
                     }
                     else if (node.Name == "br")
-                    {
-                        // Line break
-                        ImGui.NewLine();
+                    {// Line break
+                        if (!lastNodeWasBr)
+                        {
+                            ImGui.NewLine();
+                            lastNodeWasBr = true;
+                        }
+                        else { lastNodeWasBr = false; }
                     }
                     else if (node.Name == "a")
                     {
                         DrawLink(node);
+                        lastNodeWasBr = false;
                     }
                     else
                     {
