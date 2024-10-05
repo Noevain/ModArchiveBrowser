@@ -32,6 +32,7 @@ namespace ModArchiveBrowser
         {
             _downloadDirectory = downloadDirectory;
             _httpClient = new HttpClient();
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "DalamudPluginModBrowser");
             _downloadedFilenames = new HashSet<string>();//maybe fill this with cache dir or load from config later
 
             // Check if it exist first

@@ -30,6 +30,7 @@ namespace ModArchiveBrowser
             _downloadDirectory = downloadDirectory;
             _thumbnailDirectory = thumbnailsDirectory;
             _httpClient = new HttpClient();
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "DalamudPluginModBrowser");
             _downloadedFilenames = plugin.Configuration.CacheFiles;
             _modNameToThumbnail = plugin.Configuration.modNameToThumbnail;
             this.plugin = plugin;

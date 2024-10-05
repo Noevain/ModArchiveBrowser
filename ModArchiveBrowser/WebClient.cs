@@ -28,6 +28,7 @@ namespace ModArchiveBrowser
                     clientInstance = new HtmlWeb();
                     clientInstance.CachePath = Path.Combine(System.IO.Path.GetTempPath(), "modarchivebrowser\\htmlcache");
                     clientInstance.UsingCache = true;
+                    clientInstance.UserAgent = "DalamudPluginModBrowser";
                     return clientInstance;
                 }
                 else
