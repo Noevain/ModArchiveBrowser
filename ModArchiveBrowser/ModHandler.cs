@@ -88,6 +88,7 @@ namespace ModArchiveBrowser
         {
             try
             {
+                modUrl = modUrl.Replace("&#39;", "'");
                 string fileName = Path.GetFileName(new Uri(modUrl).AbsolutePath);
 
                 if (_downloadedFilenames.Contains(fileName))
