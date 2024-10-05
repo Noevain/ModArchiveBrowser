@@ -46,7 +46,7 @@ namespace ModArchiveBrowser
             string url = xivmodarchiveRoot + modThumb.url;
             Plugin.Logger.Debug($"{url}");
             HtmlDocument page = ClientInstance.Load(url);
-            HtmlNodeCollection descriptionNodeStart = page.DocumentNode.SelectNodes("//div[@id='info']/div");
+            HtmlNodeCollection descriptionNodeStart = page.DocumentNode.SelectNodes("//div[@id='info']");
             Plugin.Logger.Debug("Request made");
             return (ParseModPage(page,modThumb),descriptionNodeStart);
         }
@@ -56,7 +56,7 @@ namespace ModArchiveBrowser
             string url = xivmodarchiveRoot+"/modid/"+modId;
             Plugin.Logger.Debug($"{url}");
             HtmlDocument page = ClientInstance.Load(url);
-            HtmlNodeCollection descriptionNodeStart = page.DocumentNode.SelectNodes("//div[@id='info']/div");
+            HtmlNodeCollection descriptionNodeStart = page.DocumentNode.SelectNodes("//div[@id='info']");
             Plugin.Logger.Debug("Request made");
             ModThumb mdThumb = GetModThumbFromFullPage(page,modId);
             return(ParseModPage(page,mdThumb),descriptionNodeStart);
