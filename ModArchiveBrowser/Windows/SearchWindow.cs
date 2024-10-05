@@ -151,7 +151,7 @@ namespace ModArchiveBrowser.Windows
                     }
 
                     // Sorting Options
-                    string[] sortByOptions = { "Relevance", "Release Date", "Name" };
+                    string[] sortByOptions = { "Relevance", "Release Date", "Name", "Last Version Update", "Views","Views Today", "Downloads","Followers" };
                     int sortByIndex = (int)selectedSortBy;
                     ImGui.Combo("Sort By", ref sortByIndex, sortByOptions, sortByOptions.Length);
                     selectedSortBy = (SortBy)sortByIndex;

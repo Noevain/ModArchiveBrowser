@@ -126,7 +126,12 @@ namespace ModArchiveBrowser.Utils
     {
         Rank,
         Time_posted,
-        Name
+        Name,
+        Time_edited,
+        Views,
+        Views_today,
+        Downloads,
+        Followers
     }
 
     public enum SortOrder
