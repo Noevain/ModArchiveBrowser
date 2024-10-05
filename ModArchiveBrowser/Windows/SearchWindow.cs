@@ -132,7 +132,7 @@ namespace ModArchiveBrowser.Windows
                     }
                     ImGui.EndDisabled();
                     // DT Compatibility Dropdown
-                    string[] dtCompatOptions = { "Compatible", "Not Compatible" };
+                    string[] dtCompatOptions = { "Compatible", "Tex Tools partial","Partial Compatibility","Not compatible" };
                     int dtCompatIndex = (int)selectedDTCompat;
                     ImGui.Combo("DT Compatibility", ref dtCompatIndex, dtCompatOptions, dtCompatOptions.Length);
                     selectedDTCompat = (DTCompatibility)dtCompatIndex;
