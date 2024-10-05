@@ -8,6 +8,7 @@ using ModArchiveBrowser.Windows;
 using HtmlAgilityPack;
 using ModArchiveBrowser.Interop.Penumbra;
 using Dalamud.Interface.ImGuiFileDialog;
+using Dalamud.Utility;
 
 namespace ModArchiveBrowser;
 
@@ -62,6 +63,10 @@ public sealed class Plugin : IDalamudPlugin
         {
             HelpMessage = "Display the config page"
         });
+        CommandManager.AddHandler("/modId", new CommandInfo(OnCommand)
+        {
+            HelpMessage = "Manually display the corresponding mod in the mod window"
+        });
         PluginInterface.UiBuilder.Draw += DrawUI;
 
         // This adds a button to the plugin installer entry of this plugin which allows
@@ -83,6 +88,7 @@ public sealed class Plugin : IDalamudPlugin
         CommandManager.RemoveHandler("/archive");
         CommandManager.RemoveHandler("/modsearch");
         CommandManager.RemoveHandler("/archiveconfig");
+        CommandManager.RemoveHandler("/modId");
         modHandler.Dispose();
         penumbra.Dispose();
     }
@@ -94,6 +100,17 @@ public sealed class Plugin : IDalamudPlugin
             case "/archive":MainWindow.Toggle();break;
             case "/modsearch":searchWindow.Toggle();break;
             case "/archiveconfig":ConfigWindow.Toggle();break;
+            case "/modId": if (!args.IsNullOrEmpty())
+                {
+                    modWindow.ChangeMod(args);
+                    modWindow.IsOpen = true;
+                    modWindow.BringToFront();
+                }
+                else
+                {
+                    Plugin.Logger.Error("No argument");
+                }
+                break;
             default:break;
         }
     }

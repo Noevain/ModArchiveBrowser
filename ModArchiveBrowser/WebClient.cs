@@ -51,12 +51,48 @@ namespace ModArchiveBrowser
             return (ParseModPage(page,modThumb),descriptionNodeStart);
         }
 
+        public static (Mod,HtmlNodeCollection) GetModPage(string modId)
+        {
+            string url = xivmodarchiveRoot+"/modid/"+modId;
+            Plugin.Logger.Debug($"{url}");
+            HtmlDocument page = ClientInstance.Load(url);
+            HtmlNodeCollection descriptionNodeStart = page.DocumentNode.SelectNodes("//div[@id='info']/div");
+            Plugin.Logger.Debug("Request made");
+            ModThumb mdThumb = GetModThumbFromFullPage(page,modId);
+            return(ParseModPage(page,mdThumb),descriptionNodeStart);
+        }
+
         public static List<ModThumb> DoSearch(string searchUrl)
         {
             string url = xivmodarchiveRoot + '/' + searchUrl;
             HtmlDocument page = ClientInstance.Load(url);
             Plugin.Logger.Debug("Request made");
             return ParseSearchResults(page);
+        }
+
+        public static ModThumb GetModThumbFromFullPage(HtmlDocument page,string url)
+        {
+            string title;
+            string thumbUrl;
+            string authorName;
+            string type;
+            string gender;
+            string views;
+            HtmlNodeCollection titleNode = page.DocumentNode.SelectNodes("//h1[contains(@class, 'display-5')]");
+            HtmlNodeCollection imageNode = page.DocumentNode.SelectNodes("//img[contains(@class, 'mod-carousel-image')]/@src");
+            HtmlNodeCollection authorNode = page.DocumentNode.SelectNodes("//a[contains(@class, 'user-card-link')]");
+            HtmlNodeCollection typeNodes = page.DocumentNode.SelectNodes("//div[contains(@class, 'col-8')]//p[contains(@class, 'lead')]");
+            HtmlNodeCollection genderNodes = page.DocumentNode.SelectNodes("/html/body/div[2]/div[2]/div[2]/div[1]/div[3]/div[6]/code/a");
+            HtmlNodeCollection viewsNodes = page.DocumentNode.SelectNodes("/html/body/div[2]/div[2]/div[2]/div[1]/div[3]/div[1]/div/span[1]/div/span[2]");
+            title = titleNode[0].InnerText;
+            thumbUrl = imageNode[0].GetAttributeValue("src", "none");
+            authorName = authorNode[0].InnerText;
+            type = typeNodes[0].InnerText;
+            gender = genderNodes[0].InnerText;
+            views = viewsNodes[0].InnerText;
+            return new ModThumb(title, url, authorName,thumbUrl,"none",type,gender,views);
+
+
         }
 
         public static Mod ParseModPage(HtmlDocument page,ModThumb thumb)//I know,I know,this is ugly

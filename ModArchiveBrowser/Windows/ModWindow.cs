@@ -44,6 +44,12 @@ namespace ModArchiveBrowser.Windows
             (this.mod,this.descriptionNodes) = WebClient.GetModPage(modThumb);
             failedAvatarUrl = false ;
         }
+
+        public void ChangeMod(string modId)
+        {
+            (this.mod, this.descriptionNodes) = WebClient.GetModPage(modId);
+            failedAvatarUrl = false;
+        }
         public void Dispose()
         {
 
