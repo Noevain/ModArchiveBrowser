@@ -80,6 +80,27 @@ namespace ModArchiveBrowser
             HtmlNodeCollection downloadsNodes = page.DocumentNode.SelectNodes("//span[contains(@class, 'emoji-block') and contains(@title, 'Downloads')]//span[contains(@class, 'count')]");
             HtmlNodeCollection pinsNodes = page.DocumentNode.SelectNodes("//span[contains(@class, 'emoji-block') and contains(@title, 'Followers')]//span[contains(@class, 'count')]");
             HtmlNodeCollection lastVersionUpdateNodes = page.DocumentNode.SelectNodes("//div[contains(@class, 'mod-meta-block')]//code[contains(@class, 'server-date')][1]");
+            HtmlNode dtCompatible = page.DocumentNode.SelectSingleNode(".//div[contains(@class, 'alert-success')]");
+            DTCompatibility dTCompatibility = DTCompatibility.FullyCompatible;
+            if(dtCompatible is null)
+            {
+                HtmlNode dtTexTools = page.DocumentNode.SelectSingleNode(".//div[contains(@class, 'alert-info')]");
+                dTCompatibility = DTCompatibility.TexToolsCompatible;
+                if(dtTexTools is null)
+                {
+                    HtmlNode dtPartial = page.DocumentNode.SelectSingleNode(".//div[contains(@class, 'alert-warning')]");
+                    dTCompatibility = DTCompatibility.PartiallyCompatible;
+                    if(dtPartial is null)
+                    {
+                        HtmlNode dtFucked = page.DocumentNode.SelectSingleNode(".//div[contains(@class, 'alert-danger')]");
+                        dTCompatibility = DTCompatibility.NotCompatible;
+                    }
+                    else
+                    {
+                        dTCompatibility = DTCompatibility.PartiallyCompatible;//should never happen but you never know
+                    }
+                }
+            }
             profile_pic = authorProfilePictureNodes[0].GetAttributeValue("src", "none");
             download_url = downloadModButtonNodes[0].GetAttributeValue("href", "none");
             if (affectsReplacesNodes != null)
@@ -109,7 +130,7 @@ namespace ModArchiveBrowser
             //originalReleaseDate = "N/A";
             string description = "I will implement description parsing/rendering,later";
             ModMetadata modMetadata = new ModMetadata(views,downloads,pins,lastVersionUpdate,originalReleaseDate, 
-                races,tags,description,affectReplace);
+                races,tags,description,affectReplace,dTCompatibility);
             return (new Mod(thumb, download_url,profile_pic, modMetadata));
 
 

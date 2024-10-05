@@ -63,9 +63,10 @@ namespace ModArchiveBrowser.Utils
         public string[] tags;
         public string description;
         public string affectReplace;
+        public DTCompatibility dTCompatibility;
 
         public ModMetadata(string views, string downloads, string pins, string last_update, string release_date,
-            string[] races, string[] tags, string description, string affectReplace)
+            string[] races, string[] tags, string description, string affectReplace,DTCompatibility dT)
         {
             this.views = views;
             this.downloads = downloads;
@@ -76,6 +77,7 @@ namespace ModArchiveBrowser.Utils
             this.tags = tags;
             this.description = description;
             this.affectReplace = affectReplace;
+            this.dTCompatibility = dT;
         }
     }
 
