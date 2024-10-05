@@ -49,7 +49,7 @@ namespace ModArchiveBrowser.Windows
 
         }
 
-        private void UpdateSearch(List<ModThumb> searchRes)
+        public void UpdateSearch(List<ModThumb> searchRes)
         {
             this.modThumbs=searchRes;
             RebuildSharedTextures();
@@ -132,7 +132,7 @@ namespace ModArchiveBrowser.Windows
                     }
                     ImGui.EndDisabled();
                     // DT Compatibility Dropdown
-                    string[] dtCompatOptions = { "Compatible", "Not Compatible" };
+                    string[] dtCompatOptions = { "Compatible", "Tex Tools partial","Partial Compatibility","Not compatible" };
                     int dtCompatIndex = (int)selectedDTCompat;
                     ImGui.Combo("DT Compatibility", ref dtCompatIndex, dtCompatOptions, dtCompatOptions.Length);
                     selectedDTCompat = (DTCompatibility)dtCompatIndex;
@@ -151,7 +151,7 @@ namespace ModArchiveBrowser.Windows
                     }
 
                     // Sorting Options
-                    string[] sortByOptions = { "Relevance", "Release Date", "Name" };
+                    string[] sortByOptions = { "Relevance", "Release Date", "Name", "Last Version Update", "Views","Views Today", "Downloads","Followers" };
                     int sortByIndex = (int)selectedSortBy;
                     ImGui.Combo("Sort By", ref sortByIndex, sortByOptions, sortByOptions.Length);
                     selectedSortBy = (SortBy)sortByIndex;
@@ -204,7 +204,7 @@ namespace ModArchiveBrowser.Windows
                         }
                         catch (Exception e)
                         {
-                            Plugin.Logger.Error($"Caught ex,changing window:{e}");
+                            Plugin.ReportError("Error while loading mod,check /xllog for details", e);
                         }
                     }
                 }

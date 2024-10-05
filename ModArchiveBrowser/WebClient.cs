@@ -15,6 +15,9 @@ namespace ModArchiveBrowser
     internal class WebClient
     {
         public const string xivmodarchiveRoot = "https://www.xivmodarchive.com";
+        public const string new_and_updated_from_patreon_subs = "search?nsfl=false&sponsored=true&dt_compat=1&sortby=time_edited&sortorder=desc";
+        public const string today_most_viewed = "search?nsfl=false&dt_compat=1&sortby=views_today&sortorder=desc";
+        public const string newest_mods_from_all_users = "search?nsfl=false&dt_compat=1&sortby=time_published&sortorder=desc";
         private static HtmlWeb clientInstance = null;
         public static HtmlWeb ClientInstance
         {
@@ -25,6 +28,7 @@ namespace ModArchiveBrowser
                     clientInstance = new HtmlWeb();
                     clientInstance.CachePath = Path.Combine(System.IO.Path.GetTempPath(), "modarchivebrowser\\htmlcache");
                     clientInstance.UsingCache = true;
+                    clientInstance.UserAgent = "DalamudPluginModBrowser";
                     return clientInstance;
                 }
                 else
@@ -46,9 +50,20 @@ namespace ModArchiveBrowser
             string url = xivmodarchiveRoot + modThumb.url;
             Plugin.Logger.Debug($"{url}");
             HtmlDocument page = ClientInstance.Load(url);
-            HtmlNodeCollection descriptionNodeStart = page.DocumentNode.SelectNodes("//div[@id='info']/div");
+            HtmlNodeCollection descriptionNodeStart = page.DocumentNode.SelectNodes("//div[@id='info']");
             Plugin.Logger.Debug("Request made");
             return (ParseModPage(page,modThumb),descriptionNodeStart);
+        }
+
+        public static (Mod,HtmlNodeCollection) GetModPage(string modId)
+        {
+            string url = xivmodarchiveRoot+"/modid/"+modId;
+            Plugin.Logger.Debug($"{url}");
+            HtmlDocument page = ClientInstance.Load(url);
+            HtmlNodeCollection descriptionNodeStart = page.DocumentNode.SelectNodes("//div[@id='info']");
+            Plugin.Logger.Debug("Request made");
+            ModThumb mdThumb = GetModThumbFromFullPage(page,modId);
+            return(ParseModPage(page,mdThumb),descriptionNodeStart);
         }
 
         public static List<ModThumb> DoSearch(string searchUrl)
@@ -57,6 +72,31 @@ namespace ModArchiveBrowser
             HtmlDocument page = ClientInstance.Load(url);
             Plugin.Logger.Debug("Request made");
             return ParseSearchResults(page);
+        }
+
+        public static ModThumb GetModThumbFromFullPage(HtmlDocument page,string url)
+        {
+            string title;
+            string thumbUrl;
+            string authorName;
+            string type;
+            string gender;
+            string views;
+            HtmlNodeCollection titleNode = page.DocumentNode.SelectNodes("//h1[contains(@class, 'display-5')]");
+            HtmlNodeCollection imageNode = page.DocumentNode.SelectNodes("//img[contains(@class, 'mod-carousel-image')]/@src");
+            HtmlNodeCollection authorNode = page.DocumentNode.SelectNodes("//a[contains(@class, 'user-card-link')]");
+            HtmlNodeCollection typeNodes = page.DocumentNode.SelectNodes("//div[contains(@class, 'col-8')]//p[contains(@class, 'lead')]");
+            HtmlNodeCollection genderNodes = page.DocumentNode.SelectNodes("/html/body/div[2]/div[2]/div[2]/div[1]/div[3]/div[6]/code/a");
+            HtmlNodeCollection viewsNodes = page.DocumentNode.SelectNodes("/html/body/div[2]/div[2]/div[2]/div[1]/div[3]/div[1]/div/span[1]/div/span[2]");
+            title = titleNode[0].InnerText;
+            thumbUrl = imageNode[0].GetAttributeValue("src", "none");
+            authorName = authorNode[0].InnerText;
+            type = typeNodes[0].InnerText;
+            gender = genderNodes[0].InnerText;
+            views = viewsNodes[0].InnerText;
+            return new ModThumb(title, url, authorName,thumbUrl,"none",type,gender,views);
+
+
         }
 
         public static Mod ParseModPage(HtmlDocument page,ModThumb thumb)//I know,I know,this is ugly
@@ -80,6 +120,27 @@ namespace ModArchiveBrowser
             HtmlNodeCollection downloadsNodes = page.DocumentNode.SelectNodes("//span[contains(@class, 'emoji-block') and contains(@title, 'Downloads')]//span[contains(@class, 'count')]");
             HtmlNodeCollection pinsNodes = page.DocumentNode.SelectNodes("//span[contains(@class, 'emoji-block') and contains(@title, 'Followers')]//span[contains(@class, 'count')]");
             HtmlNodeCollection lastVersionUpdateNodes = page.DocumentNode.SelectNodes("//div[contains(@class, 'mod-meta-block')]//code[contains(@class, 'server-date')][1]");
+            HtmlNode dtCompatible = page.DocumentNode.SelectSingleNode(".//div[contains(@class, 'alert-success')]");
+            DTCompatibility dTCompatibility = DTCompatibility.FullyCompatible;
+            if(dtCompatible is null)
+            {
+                HtmlNode dtTexTools = page.DocumentNode.SelectSingleNode(".//div[contains(@class, 'alert-info')]");
+                dTCompatibility = DTCompatibility.TexToolsCompatible;
+                if(dtTexTools is null)
+                {
+                    HtmlNode dtPartial = page.DocumentNode.SelectSingleNode(".//div[contains(@class, 'alert-warning')]");
+                    dTCompatibility = DTCompatibility.PartiallyCompatible;
+                    if(dtPartial is null)
+                    {
+                        HtmlNode dtFucked = page.DocumentNode.SelectSingleNode(".//div[contains(@class, 'alert-danger')]");
+                        dTCompatibility = DTCompatibility.NotCompatible;
+                    }
+                    else
+                    {
+                        dTCompatibility = DTCompatibility.PartiallyCompatible;//should never happen but you never know
+                    }
+                }
+            }
             profile_pic = authorProfilePictureNodes[0].GetAttributeValue("src", "none");
             download_url = downloadModButtonNodes[0].GetAttributeValue("href", "none");
             if (affectsReplacesNodes != null)
@@ -109,7 +170,7 @@ namespace ModArchiveBrowser
             //originalReleaseDate = "N/A";
             string description = "I will implement description parsing/rendering,later";
             ModMetadata modMetadata = new ModMetadata(views,downloads,pins,lastVersionUpdate,originalReleaseDate, 
-                races,tags,description,affectReplace);
+                races,tags,description,affectReplace,dTCompatibility);
             return (new Mod(thumb, download_url,profile_pic, modMetadata));
 
 

@@ -8,6 +8,9 @@ using ModArchiveBrowser.Windows;
 using HtmlAgilityPack;
 using ModArchiveBrowser.Interop.Penumbra;
 using Dalamud.Interface.ImGuiFileDialog;
+using Dalamud.Utility;
+using Dalamud.Game.Text.SeStringHandling;
+using System;
 
 namespace ModArchiveBrowser;
 
@@ -17,6 +20,8 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static ITextureProvider TextureProvider { get; private set; } = null!;
     [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
     [PluginService] internal static IPluginLog Logger { get; private set; } = null!;
+
+    [PluginService] internal static IChatGui ChatGui { get; private set; } = null!;
 
     public Configuration Configuration { get; init; }
 
@@ -62,6 +67,10 @@ public sealed class Plugin : IDalamudPlugin
         {
             HelpMessage = "Display the config page"
         });
+        CommandManager.AddHandler("/modid", new CommandInfo(OnCommand)
+        {
+            HelpMessage = "Manually display the corresponding mod in the mod window"
+        });
         PluginInterface.UiBuilder.Draw += DrawUI;
 
         // This adds a button to the plugin installer entry of this plugin which allows
@@ -70,6 +79,16 @@ public sealed class Plugin : IDalamudPlugin
 
         // Adds another button that is doing the same but for the main ui of the plugin
         PluginInterface.UiBuilder.OpenMainUi += ToggleMainUI;
+    }
+
+    public static void ReportError(string msg,Exception? ex)
+    {
+        SeStringBuilder sb = new SeStringBuilder().AddText("[ModArchiveBrowser] Error:"+msg);
+        ChatGui.PrintError(sb.BuiltString);
+        if (ex is not null)
+        {
+            Plugin.Logger.Error(ex.ToString());
+        }
     }
 
     public void Dispose()
@@ -83,6 +102,7 @@ public sealed class Plugin : IDalamudPlugin
         CommandManager.RemoveHandler("/archive");
         CommandManager.RemoveHandler("/modsearch");
         CommandManager.RemoveHandler("/archiveconfig");
+        CommandManager.RemoveHandler("/modid");
         modHandler.Dispose();
         penumbra.Dispose();
     }
@@ -94,6 +114,17 @@ public sealed class Plugin : IDalamudPlugin
             case "/archive":MainWindow.Toggle();break;
             case "/modsearch":searchWindow.Toggle();break;
             case "/archiveconfig":ConfigWindow.Toggle();break;
+            case "/modId": if (!args.IsNullOrEmpty())
+                {
+                    modWindow.ChangeMod(args);
+                    modWindow.IsOpen = true;
+                    modWindow.BringToFront();
+                }
+                else
+                {
+                    ReportError("No argument",null);
+                }
+                break;
             default:break;
         }
     }

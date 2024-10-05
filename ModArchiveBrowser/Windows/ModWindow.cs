@@ -28,6 +28,7 @@ namespace ModArchiveBrowser.Windows
         private bool failedAvatarUrl = false;
         private bool _isLoading = false;
         private string _statusMessage = string.Empty;
+        private bool lastNodeWasBr = false;
         public ModWindow(Plugin plugin): base("Mod view window##")
         {
             this.plugin = plugin;
@@ -43,6 +44,12 @@ namespace ModArchiveBrowser.Windows
             (this.mod,this.descriptionNodes) = WebClient.GetModPage(modThumb);
             failedAvatarUrl = false ;
         }
+
+        public void ChangeMod(string modId)
+        {
+            (this.mod, this.descriptionNodes) = WebClient.GetModPage(modId);
+            failedAvatarUrl = false;
+        }
         public void Dispose()
         {
 
@@ -55,26 +62,44 @@ namespace ModArchiveBrowser.Windows
                 case HtmlNodeType.Text:
                     // Reached the text of the node
                     ImGui.TextWrapped(WebUtility.HtmlDecode(node.InnerText.Trim()));
+                    lastNodeWasBr = false;
                     break;
 
                 case HtmlNodeType.Element:
                     if (node.Name == "p")
                     {
-                        // Paragraphs
-                        foreach (var child in node.ChildNodes)
+                        bool isLead = node.GetAttributeValue("class", string.Empty).Contains("lead");
+
+                        if (isLead)
                         {
-                            DrawDescHtmlFromNode(child);
+                            // Make text larger for lead paragraphs
+                            ImGui.TextWrapped(node.InnerText.Trim());
+                            //gotta do something with fonts,I'll figure it out later
+                        }
+                        else
+                        {
+                            // Paragraphs
+                            foreach (var child in node.ChildNodes)
+                            {
+                                DrawDescHtmlFromNode(child);
+                            }
                         }
                         ImGui.NewLine(); // Add space after paragraphs
+                        lastNodeWasBr = false;
                     }
                     else if (node.Name == "br")
-                    {
-                        // Line break
-                        ImGui.NewLine();
+                    {// Line break
+                        if (!lastNodeWasBr)
+                        {
+                            ImGui.NewLine();
+                            lastNodeWasBr = true;
+                        }
+                        else { lastNodeWasBr = false; }
                     }
                     else if (node.Name == "a")
                     {
                         DrawLink(node);
+                        lastNodeWasBr = false;
                     }
                     else
                     {
@@ -151,8 +176,13 @@ namespace ModArchiveBrowser.Windows
             }
 
             // DT compatiblity
-            ImGui.TextColored(new Vector4(0.0f, 1.0f, 0.0f, 1.0f), "DT Compatibility: ✅ This mod is compatible with Dawntrail.");
-
+            switch (mod.Value.modMeta.dTCompatibility)
+            {
+                case DTCompatibility.FullyCompatible: ImGui.TextColored(new Vector4(0.0f, 1.0f, 0.0f, 1.0f), "DT Compatibility: ✅ This mod is compatible with Dawntrail.");break;
+                case DTCompatibility.TexToolsCompatible: ImGui.TextColored(new Vector4(0.0f, 0.0f, 0.0f, 1.0f), "DT Compatibility: This mod is not Penumbra-Compatible in Dawntrail, but may be made so via TexTools."); break;
+                case DTCompatibility.PartiallyCompatible: ImGui.TextColored(new Vector4(1.0f, 1.0f, 0.0f, 1.0f), "DT Compatibility: This mod is only partially functional in Dawntrail. Some parts may be significantly broken or require TT to fix."); break;
+                case DTCompatibility.NotCompatible: ImGui.TextColored(new Vector4(1.0f, 0.0f, 0.0f, 1.0f), "DT Compatibility:❌ This mod does NOT work in Dawntrail, and is entirely non-functional. It will be eventually removed if not updated by the author."); break;
+            }
             ImGui.Columns(2, "Columns", true);
 
             // Left Column (Mod Information)
