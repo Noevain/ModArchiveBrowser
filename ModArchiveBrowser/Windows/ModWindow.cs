@@ -18,7 +18,6 @@ using HtmlAgilityPack;
 using Dalamud.Interface.Utility.Raii;
 using System.Net;
 using System.Diagnostics;
-using ImGuizmoNET;
 namespace ModArchiveBrowser.Windows
 {
     public class ModWindow : Window, IDisposable
