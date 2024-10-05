@@ -83,7 +83,7 @@ public sealed class Plugin : IDalamudPlugin
 
     public static void ReportError(string msg,Exception? ex)
     {
-        SeStringBuilder sb = new SeStringBuilder().AddText("[ModArchiveBroser] Error:"+msg);
+        SeStringBuilder sb = new SeStringBuilder().AddText("[ModArchiveBrowser] Error:"+msg);
         ChatGui.PrintError(sb.BuiltString);
         if (ex is not null)
         {
