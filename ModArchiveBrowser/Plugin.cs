@@ -67,7 +67,7 @@ public sealed class Plugin : IDalamudPlugin
         {
             HelpMessage = "Display the config page"
         });
-        CommandManager.AddHandler("/modId", new CommandInfo(OnCommand)
+        CommandManager.AddHandler("/modid", new CommandInfo(OnCommand)
         {
             HelpMessage = "Manually display the corresponding mod in the mod window"
         });
@@ -102,7 +102,7 @@ public sealed class Plugin : IDalamudPlugin
         CommandManager.RemoveHandler("/archive");
         CommandManager.RemoveHandler("/modsearch");
         CommandManager.RemoveHandler("/archiveconfig");
-        CommandManager.RemoveHandler("/modId");
+        CommandManager.RemoveHandler("/modid");
         modHandler.Dispose();
         penumbra.Dispose();
     }
