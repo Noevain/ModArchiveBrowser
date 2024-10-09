@@ -5,7 +5,7 @@
     "Punchline": "Browse and install mods from the comfort of your FFXIV house ",
     "Description": "Lets you browse and install mods in 1 click from www.xivmodarchive.com and add the modthumbnail in Penumbra",
     "InternalName": "ModArchiveBrowser",
-    "AssemblyVersion": "0.3.0",
+    "AssemblyVersion": "0.4.0",
     "RepoUrl": "https://github.com/Noevain/ModArchiveBrowser",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 10,
@@ -17,8 +17,8 @@
     "LoadRequiredState": 0,
     "LoadSync": false,
     "AcceptsFeedback": false,
-    "DownloadLinkInstall": "https://github.com/Noevain/ModArchiveBrowser/releases/download/0.3.0/ModArchiveBrowser.zip",
-    "DownloadLinkUpdate": "https://github.com/Noevain/ModArchiveBrowser/releases/download/0.3.0/ModArchiveBrowser.zip",
+    "DownloadLinkInstall": "https://github.com/Noevain/ModArchiveBrowser/releases/download/0.4.0/ModArchiveBrowser.zip",
+    "DownloadLinkUpdate": "https://github.com/Noevain/ModArchiveBrowser/releases/download/0.4.0/ModArchiveBrowser.zip",
     "IconUrl": "https://raw.githubusercontent.com/Noevain/ModArchiveBrowser/master/images/icon.png"
   }
 ]
