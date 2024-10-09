@@ -29,7 +29,7 @@ public sealed class Plugin : IDalamudPlugin
 
     public readonly PenumbraService penumbra;
     private ConfigWindow ConfigWindow { get; init; }
-    private MainWindow MainWindow { get; init; }
+    public MainWindow MainWindow { get; init; }
 
     public SearchWindow searchWindow { get; init; }
     public ModWindow modWindow { get; init; }

@@ -291,9 +291,13 @@ namespace ModArchiveBrowser.Windows
                     tag_str = tag_str + mod.Value.modMeta.tags[i]+ " ,";
                 }
                 ImGui.Text($"Last Version Update: {mod.Value.modMeta.last_update}");
-                ImGui.Text($"Affects / Replaces: {mod.Value.modMeta.affectReplace}");
-                ImGui.Text($"Races: {race_str}");
-                ImGui.TextWrapped($"Genders: {mod.Value.modThumb.genders}");
+                ImGui.NewLine();
+                ImGui.Text($"Affects / Replaces: {WebUtility.HtmlDecode(mod.Value.modMeta.affectReplace)}");
+                ImGui.NewLine();
+                ImGui.Text($"Races: {WebUtility.HtmlDecode(race_str)}");
+                ImGui.NewLine();
+                ImGui.TextWrapped($"{WebUtility.HtmlDecode(mod.Value.modThumb.genders)}");
+                ImGui.NewLine();
                 ImGui.TextWrapped($"Tags: {tag_str}");
 
                 ImGui.EndChild();

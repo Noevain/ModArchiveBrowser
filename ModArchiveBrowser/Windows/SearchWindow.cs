@@ -68,6 +68,13 @@ namespace ModArchiveBrowser.Windows
         public void DrawSearchHeader()
         {
             ImGui.Text("Search for Mods");
+            ImGui.SameLine();
+            if(ImGui.Button("Go back to homepage"))
+            {
+                plugin.MainWindow.Toggle();
+                plugin.MainWindow.BringToFront();
+                plugin.searchWindow.Toggle();
+            }
             ImGui.Separator();
 
             // Search Form
