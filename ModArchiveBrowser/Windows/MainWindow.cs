@@ -17,6 +17,8 @@ using System.Linq;
 using ModArchiveBrowser.Utils;
 using System.Threading;
 using Penumbra.Api.IpcSubscribers;
+using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace ModArchiveBrowser.Windows;
 
@@ -27,7 +29,7 @@ public class MainWindow : Window, IDisposable
     // We give this window a hidden ID using ##
     // So that the user will see "My Amazing Window" as window title,
     // but for ImGui the ID is "My Amazing Window##With a hidden ID"
-    Dictionary<string,ISharedImmediateTexture> images = new Dictionary<string, ISharedImmediateTexture>();
+    ConcurrentDictionary<string,ISharedImmediateTexture> images = new ConcurrentDictionary<string, ISharedImmediateTexture>();
     public MainWindow(Plugin plugin)
         : base("XIV Mod Archive Browser##modarchivebrowserhome")
     {
@@ -46,14 +48,22 @@ public class MainWindow : Window, IDisposable
 
     }
 
+    private void Refresh()
+    {
+        modThumbs = WebClient.GetHomePageMods();
+        modThumbs = modThumbs.Distinct().ToList();
+        RebuildSharedTextures();
+    }
+
     private void RebuildSharedTextures()
     {
-        foreach (ModThumb modThumb in modThumbs)
+        Parallel.ForEach(modThumbs, modThumb =>
         {
             string path = plugin.imageHandler.DownloadImage(modThumb.url_thumb);
             ISharedImmediateTexture sharedTexture = Plugin.TextureProvider.GetFromFile(path);
             images.TryAdd(path, sharedTexture);
         }
+            );
     }
     private void DrawHomePageTable()
     {
@@ -88,6 +98,10 @@ public class MainWindow : Window, IDisposable
             Plugin.Logger.Debug(WebClient.newest_mods_from_all_users);
             plugin.searchWindow.UpdateSearch(WebClient.DoSearch(WebClient.newest_mods_from_all_users));
             this.IsOpen = false;
+        }
+        if (ImGui.Button("Refresh homepage"))
+        {
+            Refresh();
         }
         int modCount = 0;
         foreach (ModThumb thumb in modThumbs)
