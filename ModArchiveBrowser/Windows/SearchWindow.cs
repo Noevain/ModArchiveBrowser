@@ -11,6 +11,7 @@ using Dalamud.Plugin.Services;
 using ImGuiNET;
 using ModArchiveBrowser.Utils;
 using Dalamud.Interface.Textures;
+using System.Collections.Concurrent;
 
 namespace ModArchiveBrowser.Windows
 {
@@ -33,7 +34,7 @@ namespace ModArchiveBrowser.Windows
         private string modComments = "";
         private int page = 1;
         private List<ModThumb> modThumbs = new List<ModThumb>();
-        Dictionary<string, ISharedImmediateTexture> images = new Dictionary<string, ISharedImmediateTexture>();
+        ConcurrentDictionary<string, ISharedImmediateTexture> images = new ConcurrentDictionary<string, ISharedImmediateTexture>();
         public SearchWindow(Plugin plugin)
         : base("XIV Mod Archive Search##modarchivebrowsersearch")
         {
@@ -57,12 +58,13 @@ namespace ModArchiveBrowser.Windows
 
         private void RebuildSharedTextures()
         {
-            foreach (ModThumb modThumb in modThumbs)
+            Parallel.ForEach(modThumbs, modThumb =>
             {
                 string path = plugin.imageHandler.DownloadImage(modThumb.url_thumb);
                 ISharedImmediateTexture sharedTexture = Plugin.TextureProvider.GetFromFile(path);
                 images.TryAdd(path, sharedTexture);
             }
+            );
         }
 
         public void DrawSearchHeader()
