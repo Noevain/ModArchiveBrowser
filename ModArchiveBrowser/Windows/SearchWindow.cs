@@ -58,7 +58,8 @@ namespace ModArchiveBrowser.Windows
 
         private void RebuildSharedTextures()
         {
-            Parallel.ForEach(modThumbs, modThumb =>
+            ParallelOptions parallelOptions = new ParallelOptions{ MaxDegreeOfParallelism = 4};
+            Parallel.ForEach(modThumbs,parallelOptions, modThumb =>
             {
                 string path = plugin.imageHandler.DownloadImage(modThumb.url_thumb);
                 ISharedImmediateTexture sharedTexture = Plugin.TextureProvider.GetFromFile(path);
