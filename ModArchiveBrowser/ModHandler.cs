@@ -52,6 +52,13 @@ namespace ModArchiveBrowser
             {
                 if (!_thumbnailToTextures.ContainsKey(mod))
                 {
+                    //file could be deleted from external source
+                    if(!File.Exists(_modNameToThumbnail[mod]))
+                    {
+                        Plugin.ReportError("one of your downloaded mod had it's thumbnail deleted externally",null);
+                        Plugin.ReportError($"mod: {mod}, file not found: {_modNameToThumbnail[mod]}", null);
+                        _modNameToThumbnail.Remove(mod);
+                    }
                     var tex = Plugin.TextureProvider.GetFromFile(_modNameToThumbnail[mod]);
                     Plugin.Logger.Debug($"Tex updated for:{mod}");
                     _thumbnailToTextures.Add(mod, tex);
