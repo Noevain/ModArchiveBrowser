@@ -64,6 +64,7 @@ namespace ModArchiveBrowser.Windows
 
         private void RebuildSharedTextures()
         {
+            imagesTasks.Clear();
             foreach (ModThumb modThumb in modThumbs)
             {
                 Task thumbnailTask = Task.Run((async () =>
