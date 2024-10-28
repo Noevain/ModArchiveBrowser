@@ -79,7 +79,7 @@ public class MainWindow : Window, IDisposable
             plugin.searchWindow.IsOpen = true;
             plugin.searchWindow.BringToFront();
             Plugin.Logger.Debug(WebClient.new_and_updated_from_patreon_subs);
-            plugin.searchWindow.UpdateSearch(WebClient.DoSearch(WebClient.new_and_updated_from_patreon_subs));
+            plugin.searchWindow.UpdateSearch(WebClient.new_and_updated_from_patreon_subs);
             this.IsOpen = false;
         }
         ImGui.SameLine();
@@ -88,7 +88,7 @@ public class MainWindow : Window, IDisposable
             plugin.searchWindow.IsOpen = true;
             plugin.searchWindow.BringToFront();
             Plugin.Logger.Debug(WebClient.today_most_viewed);
-            plugin.searchWindow.UpdateSearch(WebClient.DoSearch(WebClient.today_most_viewed));
+            plugin.searchWindow.UpdateSearch(WebClient.today_most_viewed);
             this.IsOpen = false;
         }
         ImGui.SameLine();
@@ -97,7 +97,7 @@ public class MainWindow : Window, IDisposable
             plugin.searchWindow.IsOpen = true;
             plugin.searchWindow.BringToFront();
             Plugin.Logger.Debug(WebClient.newest_mods_from_all_users);
-            plugin.searchWindow.UpdateSearch(WebClient.DoSearch(WebClient.newest_mods_from_all_users));
+            plugin.searchWindow.UpdateSearch(WebClient.newest_mods_from_all_users);
             this.IsOpen = false;
         }
         if (ImGui.Button("Refresh homepage"))

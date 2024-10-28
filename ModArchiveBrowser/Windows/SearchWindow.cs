@@ -33,9 +33,10 @@ namespace ModArchiveBrowser.Windows
         private string modAffects = "";
         private string modComments = "";
         private int page = 1;
-        private Task buildingTask = null;
+        private Task searchTask = null;
         private List<ModThumb> modThumbs = new List<ModThumb>();
         ConcurrentDictionary<string, ISharedImmediateTexture> images = new ConcurrentDictionary<string, ISharedImmediateTexture>();
+        ConcurrentDictionary<string,Task> imagesTasks = new ConcurrentDictionary<string,Task>();
         public SearchWindow(Plugin plugin)
         : base("XIV Mod Archive Search##modarchivebrowsersearch")
         {
@@ -50,22 +51,29 @@ namespace ModArchiveBrowser.Windows
         {
 
         }
-
-        public void UpdateSearch(List<ModThumb> searchRes)
+        //Search Url should already have been built before being passed
+        public void UpdateSearch(string url)
         {
-            this.modThumbs=searchRes;
-            RebuildSharedTextures();
+            searchTask = Task.Run((async () =>
+                                      {
+                                          List<ModThumb> searchRes = WebClient.DoSearch(url);
+                                          this.modThumbs=searchRes;
+                                          RebuildSharedTextures();
+                                      }));
         }
 
-        private async void RebuildSharedTextures()
+        private void RebuildSharedTextures()
         {
-            ParallelOptions parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 4 };
-            await Parallel.ForEachAsync(modThumbs,parallelOptions, async (modThumb,token) =>
+            foreach (ModThumb modThumb in modThumbs)
             {
-                string path = await plugin.imageHandler.DownloadImage(modThumb.url_thumb);
-                ISharedImmediateTexture sharedTexture = Plugin.TextureProvider.GetFromFile(path);
-                images.TryAdd(modThumb.url_thumb, sharedTexture);
-            });
+                Task thumbnailTask = Task.Run((async () =>
+                                                  {
+                                                      string path = await plugin.imageHandler.DownloadImage(modThumb.url_thumb);
+                                                      ISharedImmediateTexture sharedTexture = Plugin.TextureProvider.GetFromFile(path);
+                                                      images.TryAdd(modThumb.url_thumb, sharedTexture);
+                                                  }));
+                imagesTasks.TryAdd(modThumb.url_thumb, thumbnailTask);
+            }
         }
 
         public void DrawSearchHeader()
@@ -103,7 +111,7 @@ namespace ModArchiveBrowser.Windows
                 );
 
                 Plugin.Logger.Debug(url);
-                buildingTask = Task.Run((() => {UpdateSearch(WebClient.DoSearch(url)); }));
+                searchTask = Task.Run((() => {UpdateSearch(url); }));
             }
 
             // Advanced Search Toggle
@@ -199,7 +207,7 @@ namespace ModArchiveBrowser.Windows
             foreach (ModThumb thumb in modThumbs)
             {
                 ImGui.BeginGroup();
-                if (buildingTask != null && buildingTask.IsCompleted)
+                if (imagesTasks[thumb.url_thumb] != null && imagesTasks[thumb.url_thumb].Status == TaskStatus.RanToCompletion)
                 {
                     var modThumbnail = images[thumb.url_thumb].GetWrapOrDefault();
                     if (modThumbnail != null)
@@ -226,6 +234,7 @@ namespace ModArchiveBrowser.Windows
                 { 
                     ImGui.Button("Loading....", new Vector2(355, 200));
                 }
+                
 
                 ImGui.TextWrapped(thumb.name);
 
@@ -282,7 +291,7 @@ namespace ModArchiveBrowser.Windows
                     );
 
                     Plugin.Logger.Debug(url);
-                    buildingTask = Task.Run((() => {UpdateSearch(WebClient.DoSearch(url)); }));
+                    searchTask = Task.Run((() => {UpdateSearch(url); }));
                 }
                 ImGui.SameLine();
             }
@@ -308,14 +317,14 @@ namespace ModArchiveBrowser.Windows
                 );
 
                 Plugin.Logger.Debug(url);
-                buildingTask = Task.Run((() => {UpdateSearch(WebClient.DoSearch(url)); }));
+                searchTask = Task.Run((() => {UpdateSearch(url); }));
             }
         }
         
         public override void Draw()
         {
             DrawSearchHeader();
-            if (modThumbs.Count > 0)
+            if (modThumbs.Count > 0 && searchTask != null && searchTask.Status == TaskStatus.RanToCompletion)
             {
                 DrawSearchResults();
             }
