@@ -42,7 +42,27 @@ namespace ModArchiveBrowser
             }
         }
 
-        public string DownloadImage(string imageUrl)
+        public string GetImage(string filename)
+        {
+            try
+            {
+                // Extract the file name from the URL (e.g. a41de820-fb64-4eb7-9995-ad9953dbf5e8.jpg)
+                string fileName = Path.GetFileName(new Uri(filename).AbsolutePath);
+
+                if (_downloadedFilenames.Contains(fileName))
+                {
+                    return Path.Combine(_downloadDirectory, fileName);
+                }
+
+                    return "thumbnail.jpg";//loading icon?later
+            }
+            catch (Exception ex)
+            {
+                return "thumbnail.jpg";//default missing thumbnail icon,probably best to include with manifest later
+            }
+        }
+
+        public async Task<string> DownloadImage(string imageUrl)
         {
             try
             {
@@ -55,11 +75,11 @@ namespace ModArchiveBrowser
                 }
 
 
-                byte[] imageBytes = _httpClient.GetByteArrayAsync(imageUrl).Result;
+                byte[] imageBytes = await _httpClient.GetByteArrayAsync(imageUrl);
 
 
                 string filePath = Path.Combine(_downloadDirectory, fileName);
-                File.WriteAllBytes(filePath, imageBytes);
+                await File.WriteAllBytesAsync(filePath, imageBytes);
 
                
                 _downloadedFilenames.Add(fileName);
@@ -67,8 +87,8 @@ namespace ModArchiveBrowser
             }
             catch (Exception ex)
             {
-                //Plugin.ReportError($"Failed to download image: {imageUrl}. Error: {ex.Message}",ex);
-                return string.Empty;
+                Plugin.ReportError($"Failed to download image: {imageUrl}. Error: {ex.Message}",ex);
+                return "thumbnail.jpg";
             }
         }
     }

@@ -33,6 +33,7 @@ namespace ModArchiveBrowser.Windows
         private string modAffects = "";
         private string modComments = "";
         private int page = 1;
+        private Task buildingTask = null;
         private List<ModThumb> modThumbs = new List<ModThumb>();
         ConcurrentDictionary<string, ISharedImmediateTexture> images = new ConcurrentDictionary<string, ISharedImmediateTexture>();
         public SearchWindow(Plugin plugin)
@@ -56,16 +57,15 @@ namespace ModArchiveBrowser.Windows
             RebuildSharedTextures();
         }
 
-        private void RebuildSharedTextures()
+        private async void RebuildSharedTextures()
         {
-            ParallelOptions parallelOptions = new ParallelOptions{ MaxDegreeOfParallelism = 4};
-            Parallel.ForEach(modThumbs,parallelOptions, modThumb =>
+            ParallelOptions parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 4 };
+            await Parallel.ForEachAsync(modThumbs,parallelOptions, async (modThumb,token) =>
             {
-                string path = plugin.imageHandler.DownloadImage(modThumb.url_thumb);
+                string path = await plugin.imageHandler.DownloadImage(modThumb.url_thumb);
                 ISharedImmediateTexture sharedTexture = Plugin.TextureProvider.GetFromFile(path);
-                images.TryAdd(path, sharedTexture);
-            }
-            );
+                images.TryAdd(modThumb.url_thumb, sharedTexture);
+            });
         }
 
         public void DrawSearchHeader()
@@ -103,7 +103,7 @@ namespace ModArchiveBrowser.Windows
                 );
 
                 Plugin.Logger.Debug(url);
-                UpdateSearch(WebClient.DoSearch(url));
+                buildingTask = Task.Run((() => {UpdateSearch(WebClient.DoSearch(url)); }));
             }
 
             // Advanced Search Toggle
@@ -199,25 +199,34 @@ namespace ModArchiveBrowser.Windows
             foreach (ModThumb thumb in modThumbs)
             {
                 ImGui.BeginGroup();
-                var modThumbnail = images[plugin.imageHandler.DownloadImage(thumb.url_thumb)].GetWrapOrDefault();
-                if (modThumbnail != null)
+                if (buildingTask != null && buildingTask.IsCompleted)
                 {
-                    if (ImGui.ImageButton(modThumbnail.ImGuiHandle, new Vector2(modThumbnail.Width, modThumbnail.Height)))
+                    var modThumbnail = images[thumb.url_thumb].GetWrapOrDefault();
+                    if (modThumbnail != null)
                     {
-                        try
+                        if (ImGui.ImageButton(modThumbnail.ImGuiHandle,
+                                              new Vector2(modThumbnail.Width, modThumbnail.Height)))
                         {
-                            plugin.modWindow.ChangeMod(thumb);
-                            if (!plugin.modWindow.IsOpen)
+                            try
                             {
-                                plugin.modWindow.Toggle();
+                                plugin.modWindow.ChangeMod(thumb);
+                                if (!plugin.modWindow.IsOpen)
+                                {
+                                    plugin.modWindow.Toggle();
+                                }
                             }
-                        }
-                        catch (Exception e)
-                        {
-                            Plugin.ReportError("Error while loading mod,check /xllog for details", e);
+                            catch (Exception e)
+                            {
+                                Plugin.ReportError("Error while loading mod,check /xllog for details", e);
+                            }
                         }
                     }
                 }
+                else
+                { 
+                    ImGui.Button("Loading....", new Vector2(355, 200));
+                }
+
                 ImGui.TextWrapped(thumb.name);
 
                 ImGui.Text($"By: {thumb.author}");
@@ -273,7 +282,7 @@ namespace ModArchiveBrowser.Windows
                     );
 
                     Plugin.Logger.Debug(url);
-                    UpdateSearch(WebClient.DoSearch(url));
+                    buildingTask = Task.Run((() => {UpdateSearch(WebClient.DoSearch(url)); }));
                 }
                 ImGui.SameLine();
             }
@@ -299,7 +308,7 @@ namespace ModArchiveBrowser.Windows
                 );
 
                 Plugin.Logger.Debug(url);
-                UpdateSearch(WebClient.DoSearch(url));
+                buildingTask = Task.Run((() => {UpdateSearch(WebClient.DoSearch(url)); }));
             }
         }
         

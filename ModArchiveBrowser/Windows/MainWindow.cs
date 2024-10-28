@@ -29,6 +29,7 @@ public class MainWindow : Window, IDisposable
     // We give this window a hidden ID using ##
     // So that the user will see "My Amazing Window" as window title,
     // but for ImGui the ID is "My Amazing Window##With a hidden ID"
+    private Task buildingTask = null;
     ConcurrentDictionary<string,ISharedImmediateTexture> images = new ConcurrentDictionary<string, ISharedImmediateTexture>();
     public MainWindow(Plugin plugin)
         : base("XIV Mod Archive Browser##modarchivebrowserhome")
@@ -48,23 +49,22 @@ public class MainWindow : Window, IDisposable
 
     }
 
-    private void Refresh()
+    private async void Refresh()
     {
         modThumbs = WebClient.GetHomePageMods();
         modThumbs = modThumbs.Distinct().ToList();
         RebuildSharedTextures();
     }
 
-    private void RebuildSharedTextures()
+    private async void RebuildSharedTextures()
     {
         ParallelOptions parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 4 };
-        Parallel.ForEach(modThumbs,parallelOptions, modThumb =>
+        await Parallel.ForEachAsync(modThumbs,parallelOptions, async (modThumb,token) =>
         {
-            string path = plugin.imageHandler.DownloadImage(modThumb.url_thumb);
+            string path = await plugin.imageHandler.DownloadImage(modThumb.url_thumb);
             ISharedImmediateTexture sharedTexture = Plugin.TextureProvider.GetFromFile(path);
-            images.TryAdd(path, sharedTexture);
-        }
-            );
+            images.TryAdd(modThumb.url_thumb, sharedTexture);
+        });
     }
     private void DrawHomePageTable()
     {
@@ -102,32 +102,45 @@ public class MainWindow : Window, IDisposable
         }
         if (ImGui.Button("Refresh homepage"))
         {
-            Refresh();
+             buildingTask = Task.Run(() =>
+            {
+                    Refresh();
+            });
         }
         int modCount = 0;
         foreach (ModThumb thumb in modThumbs)
             {
                 ImGui.BeginGroup();
-            var modThumbnail = images[plugin.imageHandler.DownloadImage(thumb.url_thumb)].GetWrapOrDefault();
-                if (modThumbnail != null)
+                if (buildingTask != null && buildingTask.IsCompleted)
                 {
-                    if (ImGui.ImageButton(modThumbnail.ImGuiHandle, new Vector2(modThumbnail.Width, modThumbnail.Height)))
+                    var modThumbnail = images[thumb.url_thumb].GetWrapOrDefault();
+                    if (modThumbnail != null)
                     {
-                    try
-                    {
-                        plugin.modWindow.ChangeMod(thumb);
-                        if (!plugin.modWindow.IsOpen)
+                        if (ImGui.ImageButton(modThumbnail.ImGuiHandle,
+                                              new Vector2(modThumbnail.Width, modThumbnail.Height)))
                         {
-                            plugin.modWindow.Toggle();
+                            try
+                            {
+                                plugin.modWindow.ChangeMod(thumb);
+                                if (!plugin.modWindow.IsOpen)
+                                {
+                                    plugin.modWindow.Toggle();
+                                }
+
+                                plugin.modWindow.BringToFront();
+                            }
+                            catch (Exception e)
+                            {
+                                Plugin.ReportError("Error while loading mod,check /xllog for details", e);
+                            }
                         }
-                        plugin.modWindow.BringToFront();
-                    }
-                    catch(Exception e)
-                    {
-                        Plugin.ReportError("Error while loading mod,check /xllog for details", e);
-                    }
                     }
                 }
+                else
+                {
+                    ImGui.Button("Loading....", new Vector2(355, 200));
+                }
+
                 ImGui.TextWrapped(thumb.name);
 
                 ImGui.Text($"By: {thumb.author}");
