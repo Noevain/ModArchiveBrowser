@@ -11,6 +11,7 @@ using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Utility;
 using Dalamud.Game.Text.SeStringHandling;
 using System;
+using ModArchiveBrowser.Utils;
 
 namespace ModArchiveBrowser;
 
@@ -104,6 +105,7 @@ public sealed class Plugin : IDalamudPlugin
         CommandManager.RemoveHandler("/archiveconfig");
         CommandManager.RemoveHandler("/modid");
         modHandler.Dispose();
+        imageHandler.Dispose();
         penumbra.Dispose();
     }
 

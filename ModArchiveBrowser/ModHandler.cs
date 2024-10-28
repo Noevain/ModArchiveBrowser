@@ -162,7 +162,10 @@ namespace ModArchiveBrowser
             {
                 Plugin.Logger.Debug($"Installing mod directly: {filePath}");
                 plugin.penumbra.InstallMod(filePath);
-                _modNameToThumbnail.Add(Path.GetFileNameWithoutExtension(filePath), imagepath);//the penumbra mod directory will have the same name as the file
+                Plugin.Logger.Debug($"Saving thumbnail: {imagepath}");
+                File.Copy(imagepath, Path.Combine(_thumbnailDirectory,Path.GetFileName(imagepath)), true);
+                //the penumbra mod directory will have the same name as the file
+                _modNameToThumbnail.Add(Path.GetFileNameWithoutExtension(filePath), Path.Combine(_thumbnailDirectory,Path.GetFileName(imagepath)));
                 UpdateTextures();
                 plugin.penumbra.OpenModWindow();
             }
@@ -177,7 +180,9 @@ namespace ModArchiveBrowser
                 {
                     Plugin.Logger.Debug($"Installing extracted mod: {modFile}");
                     plugin.penumbra.InstallMod(modFile);
-                    _modNameToThumbnail.Add(Path.GetFileNameWithoutExtension(filePath), imagepath);
+                    Plugin.Logger.Debug($"Saving thumbnail: {imagepath}");
+                    File.Copy(imagepath, Path.Combine(_thumbnailDirectory,Path.GetFileName(imagepath)), true);
+                    _modNameToThumbnail.Add(Path.GetFileNameWithoutExtension(filePath), Path.Combine(_thumbnailDirectory,Path.GetFileName(imagepath)));
                     UpdateTextures();
                     plugin.penumbra.OpenModWindow();
                 }
