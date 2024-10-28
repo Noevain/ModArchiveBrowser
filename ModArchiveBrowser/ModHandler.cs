@@ -52,6 +52,13 @@ namespace ModArchiveBrowser
             {
                 if (!_thumbnailToTextures.ContainsKey(mod))
                 {
+                    //file could be deleted from external source
+                    if(!File.Exists(_modNameToThumbnail[mod]))
+                    {
+                        Plugin.ReportError("one of your downloaded mod had it's thumbnail deleted externally",null);
+                        Plugin.ReportError($"mod: {mod}, file not found: {_modNameToThumbnail[mod]}", null);
+                        _modNameToThumbnail.Remove(mod);
+                    }
                     var tex = Plugin.TextureProvider.GetFromFile(_modNameToThumbnail[mod]);
                     Plugin.Logger.Debug($"Tex updated for:{mod}");
                     _thumbnailToTextures.Add(mod, tex);
@@ -155,7 +162,10 @@ namespace ModArchiveBrowser
             {
                 Plugin.Logger.Debug($"Installing mod directly: {filePath}");
                 plugin.penumbra.InstallMod(filePath);
-                _modNameToThumbnail.Add(Path.GetFileNameWithoutExtension(filePath), imagepath);//the penumbra mod directory will have the same name as the file
+                Plugin.Logger.Debug($"Saving thumbnail: {imagepath}");
+                File.Copy(imagepath, Path.Combine(_thumbnailDirectory,Path.GetFileName(imagepath)), true);
+                //the penumbra mod directory will have the same name as the file
+                _modNameToThumbnail.Add(Path.GetFileNameWithoutExtension(filePath), Path.Combine(_thumbnailDirectory,Path.GetFileName(imagepath)));
                 UpdateTextures();
                 plugin.penumbra.OpenModWindow();
             }
@@ -170,7 +180,9 @@ namespace ModArchiveBrowser
                 {
                     Plugin.Logger.Debug($"Installing extracted mod: {modFile}");
                     plugin.penumbra.InstallMod(modFile);
-                    _modNameToThumbnail.Add(Path.GetFileNameWithoutExtension(filePath), imagepath);
+                    Plugin.Logger.Debug($"Saving thumbnail: {imagepath}");
+                    File.Copy(imagepath, Path.Combine(_thumbnailDirectory,Path.GetFileName(imagepath)), true);
+                    _modNameToThumbnail.Add(Path.GetFileNameWithoutExtension(filePath), Path.Combine(_thumbnailDirectory,Path.GetFileName(imagepath)));
                     UpdateTextures();
                     plugin.penumbra.OpenModWindow();
                 }

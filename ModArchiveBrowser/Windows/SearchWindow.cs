@@ -11,6 +11,7 @@ using Dalamud.Plugin.Services;
 using ImGuiNET;
 using ModArchiveBrowser.Utils;
 using Dalamud.Interface.Textures;
+using System.Collections.Concurrent;
 
 namespace ModArchiveBrowser.Windows
 {
@@ -32,8 +33,10 @@ namespace ModArchiveBrowser.Windows
         private string modAffects = "";
         private string modComments = "";
         private int page = 1;
+        private Task searchTask = null;
         private List<ModThumb> modThumbs = new List<ModThumb>();
-        Dictionary<string, ISharedImmediateTexture> images = new Dictionary<string, ISharedImmediateTexture>();
+        ConcurrentDictionary<string, ISharedImmediateTexture> images = new ConcurrentDictionary<string, ISharedImmediateTexture>();
+        ConcurrentDictionary<string,Task> imagesTasks = new ConcurrentDictionary<string,Task>();
         public SearchWindow(Plugin plugin)
         : base("XIV Mod Archive Search##modarchivebrowsersearch")
         {
@@ -48,20 +51,29 @@ namespace ModArchiveBrowser.Windows
         {
 
         }
-
-        public void UpdateSearch(List<ModThumb> searchRes)
+        //Search Url should already have been built before being passed
+        public void UpdateSearch(string url)
         {
-            this.modThumbs=searchRes;
-            RebuildSharedTextures();
+            searchTask = Task.Run((async () =>
+                                      {
+                                          List<ModThumb> searchRes = WebClient.DoSearch(url);
+                                          this.modThumbs=searchRes;
+                                          RebuildSharedTextures();
+                                      }));
         }
 
         private void RebuildSharedTextures()
         {
+            imagesTasks.Clear();
             foreach (ModThumb modThumb in modThumbs)
             {
-                string path = plugin.imageHandler.DownloadImage(modThumb.url_thumb);
-                ISharedImmediateTexture sharedTexture = Plugin.TextureProvider.GetFromFile(path);
-                images.TryAdd(path, sharedTexture);
+                Task thumbnailTask = Task.Run((async () =>
+                                                  {
+                                                      string path = await plugin.imageHandler.DownloadImage(modThumb.url_thumb);
+                                                      ISharedImmediateTexture sharedTexture = Plugin.TextureProvider.GetFromFile(path);
+                                                      images.TryAdd(modThumb.url_thumb, sharedTexture);
+                                                  }));
+                imagesTasks.TryAdd(modThumb.url_thumb, thumbnailTask);
             }
         }
 
@@ -100,7 +112,7 @@ namespace ModArchiveBrowser.Windows
                 );
 
                 Plugin.Logger.Debug(url);
-                UpdateSearch(WebClient.DoSearch(url));
+                searchTask = Task.Run((() => {UpdateSearch(url); }));
             }
 
             // Advanced Search Toggle
@@ -196,25 +208,35 @@ namespace ModArchiveBrowser.Windows
             foreach (ModThumb thumb in modThumbs)
             {
                 ImGui.BeginGroup();
-                var modThumbnail = images[plugin.imageHandler.DownloadImage(thumb.url_thumb)].GetWrapOrDefault();
-                if (modThumbnail != null)
+                if (imagesTasks[thumb.url_thumb] != null && imagesTasks[thumb.url_thumb].Status == TaskStatus.RanToCompletion)
                 {
-                    if (ImGui.ImageButton(modThumbnail.ImGuiHandle, new Vector2(modThumbnail.Width, modThumbnail.Height)))
+                    var modThumbnail = images[thumb.url_thumb].GetWrapOrDefault();
+                    if (modThumbnail != null)
                     {
-                        try
+                        if (ImGui.ImageButton(modThumbnail.ImGuiHandle,
+                                              new Vector2(modThumbnail.Width, modThumbnail.Height)))
                         {
-                            plugin.modWindow.ChangeMod(thumb);
-                            if (!plugin.modWindow.IsOpen)
+                            try
                             {
-                                plugin.modWindow.Toggle();
+                                plugin.modWindow.ChangeMod(thumb);
+                                if (!plugin.modWindow.IsOpen)
+                                {
+                                    plugin.modWindow.Toggle();
+                                }
                             }
-                        }
-                        catch (Exception e)
-                        {
-                            Plugin.ReportError("Error while loading mod,check /xllog for details", e);
+                            catch (Exception e)
+                            {
+                                Plugin.ReportError("Error while loading mod,check /xllog for details", e);
+                            }
                         }
                     }
                 }
+                else
+                { 
+                    ImGui.Button("Loading....", new Vector2(355, 200));
+                }
+                
+
                 ImGui.TextWrapped(thumb.name);
 
                 ImGui.Text($"By: {thumb.author}");
@@ -270,7 +292,7 @@ namespace ModArchiveBrowser.Windows
                     );
 
                     Plugin.Logger.Debug(url);
-                    UpdateSearch(WebClient.DoSearch(url));
+                    searchTask = Task.Run((() => {UpdateSearch(url); }));
                 }
                 ImGui.SameLine();
             }
@@ -296,14 +318,14 @@ namespace ModArchiveBrowser.Windows
                 );
 
                 Plugin.Logger.Debug(url);
-                UpdateSearch(WebClient.DoSearch(url));
+                searchTask = Task.Run((() => {UpdateSearch(url); }));
             }
         }
         
         public override void Draw()
         {
             DrawSearchHeader();
-            if (modThumbs.Count > 0)
+            if (modThumbs.Count > 0 && searchTask != null && searchTask.Status == TaskStatus.RanToCompletion)
             {
                 DrawSearchResults();
             }

@@ -9,6 +9,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Threading.Tasks;
 using System.Net;
+using ModArchiveBrowser.Utils;
 
 namespace ModArchiveBrowser
 {
@@ -22,55 +23,81 @@ namespace ModArchiveBrowser
     using System.Threading.Tasks;
     using System.Collections.Generic;
 
-    public class ImageHandler
+    public class ImageHandler : IDisposable
+
     {
-        private readonly string _downloadDirectory;
-        private readonly HttpClient _httpClient;
-        public HashSet<string> _downloadedFilenames;
+    public readonly string _downloadDirectory;
+    private readonly HttpClient _httpClient;
+    public HashSet<string> _downloadedFilenames;
 
-        public ImageHandler(string downloadDirectory)
+    public ImageHandler(string downloadDirectory)
+    {
+        _downloadDirectory = downloadDirectory;
+        _httpClient = new HttpClient();
+        _httpClient.DefaultRequestHeaders.Add("User-Agent", "DalamudPluginModBrowser");
+        _downloadedFilenames = new HashSet<string>(); //maybe fill this with cache dir or load from config later
+
+        // Check if it exist first
+        if (!Directory.Exists(_downloadDirectory))
         {
-            _downloadDirectory = downloadDirectory;
-            _httpClient = new HttpClient();
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", "DalamudPluginModBrowser");
-            _downloadedFilenames = new HashSet<string>();//maybe fill this with cache dir or load from config later
-
-            // Check if it exist first
-            if (!Directory.Exists(_downloadDirectory))
-            {
-                Directory.CreateDirectory(_downloadDirectory);
-            }
+            Directory.CreateDirectory(_downloadDirectory);
         }
+    }
 
-        public string DownloadImage(string imageUrl)
+    public string GetImage(string filename)
+    {
+        try
         {
-            try
+            // Extract the file name from the URL (e.g. a41de820-fb64-4eb7-9995-ad9953dbf5e8.jpg)
+            string fileName = Path.GetFileName(new Uri(filename).AbsolutePath);
+
+            if (_downloadedFilenames.Contains(fileName))
             {
-                // Extract the file name from the URL (e.g. a41de820-fb64-4eb7-9995-ad9953dbf5e8.jpg)
-                string fileName = Path.GetFileName(new Uri(imageUrl).AbsolutePath);
-
-                if (_downloadedFilenames.Contains(fileName))
-                {
-                    return Path.Combine(_downloadDirectory, fileName);
-                }
-
-
-                byte[] imageBytes = _httpClient.GetByteArrayAsync(imageUrl).Result;
-
-
-                string filePath = Path.Combine(_downloadDirectory, fileName);
-                File.WriteAllBytes(filePath, imageBytes);
-
-               
-                _downloadedFilenames.Add(fileName);
-                return filePath; 
+                return Path.Combine(_downloadDirectory, fileName);
             }
-            catch (Exception ex)
-            {
-                //Plugin.ReportError($"Failed to download image: {imageUrl}. Error: {ex.Message}",ex);
-                return string.Empty;
-            }
+
+            return "thumbnail.jpg"; //loading icon?later
         }
+        catch (Exception ex)
+        {
+            return "thumbnail.jpg"; //default missing thumbnail icon,probably best to include with manifest later
+        }
+    }
+
+    public async Task<string> DownloadImage(string imageUrl)
+    {
+        try
+        {
+            // Extract the file name from the URL (e.g. a41de820-fb64-4eb7-9995-ad9953dbf5e8.jpg)
+            string fileName = Path.GetFileName(new Uri(imageUrl).AbsolutePath);
+
+            if (_downloadedFilenames.Contains(fileName))
+            {
+                return Path.Combine(_downloadDirectory, fileName);
+            }
+
+
+            byte[] imageBytes = await _httpClient.GetByteArrayAsync(imageUrl);
+
+
+            string filePath = Path.Combine(_downloadDirectory, fileName);
+            await File.WriteAllBytesAsync(filePath, imageBytes);
+
+
+            _downloadedFilenames.Add(fileName);
+            return filePath;
+        }
+        catch (Exception ex)
+        {
+            Plugin.ReportError($"Failed to download image: {imageUrl}. Error: {ex.Message}", ex);
+            return "thumbnail.jpg";
+        }
+    }
+
+    public void Dispose()
+    {
+        StaticHelpers.ClearCacheFully(_downloadDirectory);
+    }
     }
 
 

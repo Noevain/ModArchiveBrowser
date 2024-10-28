@@ -144,7 +144,7 @@ namespace ModArchiveBrowser.Windows
                 _statusMessage = "Downloading...";
                 string modpath = plugin.modHandler.DownloadModAsync(WebClient.xivmodarchiveRoot + mod.Value.url_download_button).Result;
                 _statusMessage = "Installing...";
-                plugin.modHandler.InstallMod(modpath, plugin.imageHandler.DownloadImage(mod.Value.modThumb.url_thumb));
+                plugin.modHandler.InstallMod(modpath, plugin.imageHandler.GetImage(mod.Value.modThumb.url_thumb));
 
             }).ContinueWith(task => { _isLoading = false; });
         }
@@ -198,7 +198,7 @@ namespace ModArchiveBrowser.Windows
 
                 // Image Carousel Placeholder
                 ImGui.Text("Mod Preview Image");
-                var modThumbnail = Plugin.TextureProvider.GetFromFile(plugin.imageHandler.DownloadImage(mod.Value.modThumb.url_thumb)).GetWrapOrDefault();
+                var modThumbnail = Plugin.TextureProvider.GetFromFile(plugin.imageHandler.GetImage(mod.Value.modThumb.url_thumb)).GetWrapOrDefault();
                 if (modThumbnail != null)
                 {
                     ImGui.Image(modThumbnail.ImGuiHandle, new Vector2(300, 200)); // Placeholder for image carousel
@@ -224,7 +224,7 @@ namespace ModArchiveBrowser.Windows
                 ImGui.Text(mod.Value.modThumb.author);
                 if (!failedAvatarUrl)
                 {
-                    var authorpicpath = plugin.imageHandler.DownloadImage(mod.Value.url_author_profilepic);
+                    var authorpicpath = plugin.imageHandler.GetImage(mod.Value.url_author_profilepic);
                     if (!authorpicpath.IsNullOrEmpty())
                     {
                         var authorpicThumbnail = Plugin.TextureProvider.GetFromFile(authorpicpath).GetWrapOrDefault();

@@ -17,6 +17,8 @@ using System.Linq;
 using ModArchiveBrowser.Utils;
 using System.Threading;
 using Penumbra.Api.IpcSubscribers;
+using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace ModArchiveBrowser.Windows;
 
@@ -27,32 +29,44 @@ public class MainWindow : Window, IDisposable
     // We give this window a hidden ID using ##
     // So that the user will see "My Amazing Window" as window title,
     // but for ImGui the ID is "My Amazing Window##With a hidden ID"
-    Dictionary<string,ISharedImmediateTexture> images = new Dictionary<string, ISharedImmediateTexture>();
+    private Task refreshTask = null;
+    ConcurrentDictionary<string,ISharedImmediateTexture> images = new ConcurrentDictionary<string, ISharedImmediateTexture>();
+    ConcurrentDictionary<string,Task> imagesTasks = new ConcurrentDictionary<string,Task>();
     public MainWindow(Plugin plugin)
         : base("XIV Mod Archive Browser##modarchivebrowserhome")
     {
-        modThumbs = WebClient.GetHomePageMods();
-        modThumbs = modThumbs.Distinct().ToList();
         SizeConstraints = new WindowSizeConstraints
         {
             MinimumSize = new Vector2(600, 500),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
         this.plugin = plugin;
-        RebuildSharedTextures();
+        refreshTask = Task.Run(Refresh);
     }
 
     public void Dispose() {
 
     }
 
-    private void RebuildSharedTextures()
+    private void Refresh()
     {
+        modThumbs = WebClient.GetHomePageMods();
+        modThumbs = modThumbs.Distinct().ToList();
+        RebuildSharedTextures();
+    }
+
+    private async void RebuildSharedTextures()
+    {
+        imagesTasks.Clear();
         foreach (ModThumb modThumb in modThumbs)
         {
-            string path = plugin.imageHandler.DownloadImage(modThumb.url_thumb);
-            ISharedImmediateTexture sharedTexture = Plugin.TextureProvider.GetFromFile(path);
-            images.TryAdd(path, sharedTexture);
+            Task thumbnailTask = Task.Run((async () =>
+                                              {
+                                                  string path = await plugin.imageHandler.DownloadImage(modThumb.url_thumb);
+                                                  ISharedImmediateTexture sharedTexture = Plugin.TextureProvider.GetFromFile(path);
+                                                  images.TryAdd(modThumb.url_thumb, sharedTexture);
+                                              }));
+            imagesTasks.TryAdd(modThumb.url_thumb, thumbnailTask);
         }
     }
     private void DrawHomePageTable()
@@ -68,7 +82,7 @@ public class MainWindow : Window, IDisposable
             plugin.searchWindow.IsOpen = true;
             plugin.searchWindow.BringToFront();
             Plugin.Logger.Debug(WebClient.new_and_updated_from_patreon_subs);
-            plugin.searchWindow.UpdateSearch(WebClient.DoSearch(WebClient.new_and_updated_from_patreon_subs));
+            plugin.searchWindow.UpdateSearch(WebClient.new_and_updated_from_patreon_subs);
             this.IsOpen = false;
         }
         ImGui.SameLine();
@@ -77,7 +91,7 @@ public class MainWindow : Window, IDisposable
             plugin.searchWindow.IsOpen = true;
             plugin.searchWindow.BringToFront();
             Plugin.Logger.Debug(WebClient.today_most_viewed);
-            plugin.searchWindow.UpdateSearch(WebClient.DoSearch(WebClient.today_most_viewed));
+            plugin.searchWindow.UpdateSearch(WebClient.today_most_viewed);
             this.IsOpen = false;
         }
         ImGui.SameLine();
@@ -86,33 +100,50 @@ public class MainWindow : Window, IDisposable
             plugin.searchWindow.IsOpen = true;
             plugin.searchWindow.BringToFront();
             Plugin.Logger.Debug(WebClient.newest_mods_from_all_users);
-            plugin.searchWindow.UpdateSearch(WebClient.DoSearch(WebClient.newest_mods_from_all_users));
+            plugin.searchWindow.UpdateSearch(WebClient.newest_mods_from_all_users);
             this.IsOpen = false;
+        }
+        if (ImGui.Button("Refresh homepage"))
+        {
+             refreshTask = Task.Run(() =>
+            {
+                    Refresh();
+            });
         }
         int modCount = 0;
         foreach (ModThumb thumb in modThumbs)
             {
                 ImGui.BeginGroup();
-            var modThumbnail = images[plugin.imageHandler.DownloadImage(thumb.url_thumb)].GetWrapOrDefault();
-                if (modThumbnail != null)
+                if (refreshTask != null && refreshTask.IsCompleted)
                 {
-                    if (ImGui.ImageButton(modThumbnail.ImGuiHandle, new Vector2(modThumbnail.Width, modThumbnail.Height)))
+                    var modThumbnail = images[thumb.url_thumb].GetWrapOrDefault();
+                    if (modThumbnail != null)
                     {
-                    try
-                    {
-                        plugin.modWindow.ChangeMod(thumb);
-                        if (!plugin.modWindow.IsOpen)
+                        if (ImGui.ImageButton(modThumbnail.ImGuiHandle,
+                                              new Vector2(modThumbnail.Width, modThumbnail.Height)))
                         {
-                            plugin.modWindow.Toggle();
+                            try
+                            {
+                                plugin.modWindow.ChangeMod(thumb);
+                                if (!plugin.modWindow.IsOpen)
+                                {
+                                    plugin.modWindow.Toggle();
+                                }
+
+                                plugin.modWindow.BringToFront();
+                            }
+                            catch (Exception e)
+                            {
+                                Plugin.ReportError("Error while loading mod,check /xllog for details", e);
+                            }
                         }
-                        plugin.modWindow.BringToFront();
-                    }
-                    catch(Exception e)
-                    {
-                        Plugin.ReportError("Error while loading mod,check /xllog for details", e);
-                    }
                     }
                 }
+                else
+                {
+                    ImGui.Button("Loading....", new Vector2(355, 200));
+                }
+
                 ImGui.TextWrapped(thumb.name);
 
                 ImGui.Text($"By: {thumb.author}");
