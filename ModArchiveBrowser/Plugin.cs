@@ -116,7 +116,7 @@ public sealed class Plugin : IDalamudPlugin
             case "/archive":MainWindow.Toggle();break;
             case "/modsearch":searchWindow.Toggle();break;
             case "/archiveconfig":ConfigWindow.Toggle();break;
-            case "/modId": if (!args.IsNullOrEmpty())
+            case "/modid": if (!args.IsNullOrEmpty())
                 {
                     modWindow.ChangeMod(args);
                     modWindow.IsOpen = true;
